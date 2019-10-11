@@ -13,7 +13,8 @@ libraryDependencies ++= Seq(
 )
 
 scalacOptions ++= Seq(
-  "-Xsource:2.11"
+  "-Xsource:2.11",
+  "-language:reflectiveCalls"
 )
 
 scalacOptions --= Seq(
@@ -29,14 +30,14 @@ lazy val commonSettings = Seq(
   traceLevel := 15,
   maxErrors := 5,
   libraryDependencies ++= Seq("org.scala-lang" % "scala-reflect" % scalaVersion.value),
-  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full)
+  addCompilerPlugin("org.scalamacros"          % "paradise"      % "2.1.1" cross CrossVersion.full)
 )
 
 lazy val macros = (project in file("macros")).settings(commonSettings)
-lazy val marshall = (project in file("."))
+lazy val fusion = (project in file("."))
   .settings(commonSettings)
   .dependsOn(macros)
-  //.aggregate(macros) // <-- means the running task on rocketchip is also run by aggregate tasks
+//.aggregate(macros) // <-- means the running task on rocketchip is also run by aggregate tasks
 
 addCommandAlias("com", "all compile test:compile")
 addCommandAlias("lint", "; compile:scalafix --check ; test:scalafix --check")
