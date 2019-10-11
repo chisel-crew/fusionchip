@@ -1,0 +1,7 @@
+.bloop
+.metals
+target 
+macros/target
+project/target 
+project/project
+project/.bloop
