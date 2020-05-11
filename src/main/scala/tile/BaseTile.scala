@@ -37,7 +37,8 @@ trait HasNonDiplomaticTileParameters {
   def tileParams: TileParams = p(TileKey)
 
   def usingVM: Boolean = tileParams.core.useVM
-  def usingUser: Boolean = tileParams.core.useUser || usingVM
+  def usingUser: Boolean = tileParams.core.useUser || usingSupervisor
+  def usingSupervisor: Boolean = tileParams.core.hasSupervisorMode
   def usingDebug: Boolean = tileParams.core.useDebug
   def usingRoCC: Boolean = !p(BuildRoCC).isEmpty
   def usingBTB: Boolean = tileParams.btb.isDefined && tileParams.btb.get.nEntries > 0
@@ -78,7 +79,8 @@ trait HasNonDiplomaticTileParameters {
     val f = if (tileParams.core.fpu.nonEmpty) "f" else ""
     val d = if (tileParams.core.fpu.nonEmpty && tileParams.core.fpu.get.fLen > 32) "d" else ""
     val c = if (tileParams.core.useCompressed) "c" else ""
-    s"rv${p(XLen)}$ie$m$a$f$d$c"
+    val v = if (tileParams.core.useVector) "v" else ""
+    s"rv${p(XLen)}$ie$m$a$f$d$c$v"
   }
 
   def tileProperties: PropertyMap = {
@@ -170,11 +172,26 @@ abstract class BaseTile private (val crossing: ClockCrossingType, q: Parameters)
   protected val tlSlaveXbar = LazyModule(new TLXbar)
   protected val intXbar = LazyModule(new IntXbar)
 
+  // Node for legacy instruction trace from core
   val traceSourceNode = BundleBridgeSource(() => Vec(tileParams.core.retireWidth, new TracedInstruction()))
   val traceNode = BundleBroadcast[Vec[TracedInstruction]](Some("trace"))
   traceNode := traceSourceNode
 
-  val bpwatchSourceNode = BundleBridgeSource(() => Vec(tileParams.core.nBreakpoints, new BPWatch(tileParams.core.retireWidth)))
+  // Trace sideband signals into core
+  val traceAuxNode = BundleBridgeNexus[TraceAux]()
+  val traceAuxSinkNode = BundleBridgeSink[TraceAux]()
+  val traceAuxDefaultNode = BundleBridgeSource(() => new TraceAux)
+  traceAuxSinkNode := traceAuxNode := traceAuxDefaultNode
+
+  // Node for instruction trace conforming to RISC-V Processor Trace spec V1.0
+  val traceCoreSourceNode = BundleBridgeSource(() => new TraceCoreInterface(new TraceCoreParams()))
+  val traceCoreBroadcastNode = BundleBroadcast[TraceCoreInterface](Some("tracecore"))
+  traceCoreBroadcastNode := traceCoreSourceNode
+  def traceCoreNode: BundleBridgeNexus[TraceCoreInterface] = traceCoreBroadcastNode
+
+  // Node for watchpoints to control trace
+  def getBpwatchParams: (Int, Int) = { (tileParams.core.nBreakpoints, tileParams.core.retireWidth) }
+  val bpwatchSourceNode = BundleBridgeSource(() => Vec(getBpwatchParams._1, new BPWatch(getBpwatchParams._2)))
   val bpwatchNode = BundleBroadcast[Vec[BPWatch]](Some("bpwatch"))
   bpwatchNode := bpwatchSourceNode
 
@@ -244,6 +261,13 @@ abstract class BaseTileModuleImp[+L <: BaseTile](val outer: L) extends LazyModul
   require(resetVectorLen <= xLen)
   require(resetVectorLen <= vaddrBitsExtended)
   require (log2Up(hartId + 1) <= hartIdLen, s"p(MaxHartIdBits) of $hartIdLen is not enough for hartid $hartId")
+
+  outer.traceAuxDefaultNode.bundle.stall := false.B
+  outer.traceAuxDefaultNode.bundle.enable := false.B
+  val aux = Wire(new TraceAux)
+  aux.stall := outer.traceAuxNode.in.map(in => in._1.stall).orR
+  aux.enable := outer.traceAuxNode.in.map(in => in._1.enable).orR
+  outer.traceAuxNode.out.foreach { case (out, _) => out := aux }
 
   val constants = IO(new TileInputConstants)
 }

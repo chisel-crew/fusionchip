@@ -4,7 +4,8 @@
 package freechips.rocketchip.rocket
 
 import Chisel._
-import chisel3.experimental.dontTouch
+import chisel3.dontTouch
+import freechips.rocketchip.amba._
 import freechips.rocketchip.config.{Parameters, Field}
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.diplomacy._
@@ -98,6 +99,7 @@ trait HasCoreMemOp extends HasCoreParameters {
   val cmd  = Bits(width = M_SZ)
   val size = Bits(width = log2Ceil(coreDataBytes.log2 + 1))
   val signed = Bool()
+  val dprv = UInt(width = PRV.SZ)
 }
 
 trait HasCoreData extends HasCoreParameters {
@@ -173,29 +175,32 @@ class HellaCacheIO(implicit p: Parameters) extends CoreBundle()(p) {
 
 /** Base classes for Diplomatic TL2 HellaCaches */
 
-abstract class HellaCache(hartid: Int)(implicit p: Parameters) extends LazyModule {
-  private val tileParams = p(TileKey)
+abstract class HellaCache(hartid: Int)(implicit p: Parameters) extends LazyModule
+    with HasNonDiplomaticTileParameters {
   protected val cfg = tileParams.dcache.get
 
-  protected def cacheClientParameters = cfg.scratch.map(x => Seq()).getOrElse(Seq(TLClientParameters(
+  protected def cacheClientParameters = cfg.scratch.map(x => Seq()).getOrElse(Seq(TLMasterParameters.v1(
     name          = s"Core ${hartid} DCache",
     sourceId      = IdRange(0, 1 max cfg.nMSHRs),
     supportsProbe = TransferSizes(cfg.blockBytes, cfg.blockBytes))))
 
-  protected def mmioClientParameters = Seq(TLClientParameters(
+  protected def mmioClientParameters = Seq(TLMasterParameters.v1(
     name          = s"Core ${hartid} DCache MMIO",
     sourceId      = IdRange(firstMMIO, firstMMIO + cfg.nMMIOs),
     requestFifo   = true))
 
   def firstMMIO = (cacheClientParameters.map(_.sourceId.end) :+ 0).max
 
-  val node = TLClientNode(Seq(TLClientPortParameters(
-    cacheClientParameters ++ mmioClientParameters,
-    minLatency = 1)))
+  val node = TLClientNode(Seq(TLMasterPortParameters.v1(
+    clients = cacheClientParameters ++ mmioClientParameters,
+    minLatency = 1,
+    requestFields = tileParams.core.useVM.option(Seq()).getOrElse(Seq(AMBAProtField())))))
 
   val module: HellaCacheModule
 
   def flushOnFenceI = cfg.scratch.isEmpty && !node.edges.out(0).manager.managers.forall(m => !m.supportsAcquireT || !m.executable || m.regionType >= RegionType.TRACKED || m.regionType <= RegionType.IDEMPOTENT)
+
+  def canSupportCFlushLine = !usingVM || cfg.blockBytes * cfg.nSets <= (1 << pgIdxBits)
 
   require(!tileParams.core.haveCFlush || cfg.scratch.isEmpty, "CFLUSH_D_L1 instruction requires a D$")
 
@@ -225,16 +230,26 @@ class HellaCacheModule(outer: HellaCache) extends LazyModuleImp(outer)
   }
 }
 
+/** Support overriding which HellaCache is instantiated */
+
+case object BuildHellaCache extends Field[BaseTile => Parameters => HellaCache](HellaCacheFactory.apply)
+
+object HellaCacheFactory {
+  def apply(tile: BaseTile)(p: Parameters): HellaCache = {
+    if (tile.tileParams.dcache.get.nMSHRs == 0)
+      new DCache(tile.hartId, tile.crossing)(p)
+    else
+      new NonBlockingDCache(tile.hartId)(p)
+  }
+}
+
 /** Mix-ins for constructing tiles that have a HellaCache */
 
 trait HasHellaCache { this: BaseTile =>
   val module: HasHellaCacheModule
   implicit val p: Parameters
   var nDCachePorts = 0
-  lazy val dcache: HellaCache = LazyModule(
-    if(tileParams.dcache.get.nMSHRs == 0) {
-      new DCache(hartId, crossing)
-    } else { new NonBlockingDCache(hartId) })
+  lazy val dcache: HellaCache = LazyModule(p(BuildHellaCache)(this)(p))
 
   tlMasterXbar.node := dcache.node
 }

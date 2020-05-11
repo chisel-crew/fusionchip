@@ -5,6 +5,7 @@ package freechips.rocketchip.tilelink
 import Chisel._
 import freechips.rocketchip.config._
 import freechips.rocketchip.diplomacy._
+import freechips.rocketchip.util._
 
 // Trades off slave port proximity against routing resource cost
 object ForceFanout
@@ -32,10 +33,13 @@ class TLXbar(policy: TLArbiter.Policy = TLArbiter.roundRobin)(implicit p: Parame
 {
   val node = TLNexusNode(
     clientFn  = { seq =>
-      seq(0).copy(
+      seq(0).v1copy(
+        echoFields    = BundleField.union(seq.flatMap(_.echoFields)),
+        requestFields = BundleField.union(seq.flatMap(_.requestFields)),
+        responseKeys  = seq.flatMap(_.responseKeys).distinct,
         minLatency = seq.map(_.minLatency).min,
         clients = (TLXbar.mapInputIds(seq) zip seq) flatMap { case (range, port) =>
-          port.clients map { client => client.copy(
+          port.clients map { client => client.v1copy(
             sourceId = client.sourceId.shift(range.start)
           )}
         }
@@ -43,14 +47,16 @@ class TLXbar(policy: TLArbiter.Policy = TLArbiter.roundRobin)(implicit p: Parame
     },
     managerFn = { seq =>
       val fifoIdFactory = TLXbar.relabeler()
-      seq(0).copy(
+      seq(0).v1copy(
+        responseFields = BundleField.union(seq.flatMap(_.responseFields)),
+        requestKeys = seq.flatMap(_.requestKeys).distinct,
         minLatency = seq.map(_.minLatency).min,
         endSinkId = TLXbar.mapOutputIds(seq).map(_.end).max,
         managers = seq.flatMap { port =>
           require (port.beatBytes == seq(0).beatBytes,
             s"Xbar data widths don't match: ${port.managers.map(_.name)} has ${port.beatBytes}B vs ${seq(0).managers.map(_.name)} has ${seq(0).beatBytes}B")
           val fifoIdMapper = fifoIdFactory()
-          port.managers map { manager => manager.copy(
+          port.managers map { manager => manager.v1copy(
             fifoId = manager.fifoId.map(fifoIdMapper(_))
           )}
         }
@@ -64,8 +70,15 @@ class TLXbar(policy: TLArbiter.Policy = TLArbiter.roundRobin)(implicit p: Parame
       println (s"!!! WARNING !!!")
     }
 
-    val (io_in, edgesIn) = node.in.unzip
-    val (io_out, edgesOut) = node.out.unzip
+    TLXbar.circuit(policy, node.in, node.out)
+  }
+}
+
+object TLXbar
+{
+  def circuit(policy: TLArbiter.Policy, seqIn: Seq[(TLBundle, TLEdge)], seqOut: Seq[(TLBundle, TLEdge)]) {
+    val (io_in, edgesIn) = seqIn.unzip
+    val (io_out, edgesOut) = seqOut.unzip
 
     // Not every master need connect to every slave on every channel; determine which connections are necessary
     val reachableIO = edgesIn.map { cp => edgesOut.map { mp =>
@@ -111,7 +124,7 @@ class TLXbar(policy: TLArbiter.Policy = TLArbiter.roundRobin)(implicit p: Parame
       val r = inputIdRanges(i)
 
       if (connectAIO(i).exists(x=>x)) {
-        in(i).a <> io_in(i).a
+        in(i).a :<> io_in(i).a
         in(i).a.bits.source := io_in(i).a.bits.source | UInt(r.start)
       } else {
         in(i).a.valid := Bool(false)
@@ -119,7 +132,7 @@ class TLXbar(policy: TLArbiter.Policy = TLArbiter.roundRobin)(implicit p: Parame
       }
 
       if (connectBIO(i).exists(x=>x)) {
-        io_in(i).b <> in(i).b
+        io_in(i).b :<> in(i).b
         io_in(i).b.bits.source := trim(in(i).b.bits.source, r.size)
       } else {
         in(i).b.ready := Bool(true)
@@ -127,7 +140,7 @@ class TLXbar(policy: TLArbiter.Policy = TLArbiter.roundRobin)(implicit p: Parame
       }
 
       if (connectCIO(i).exists(x=>x)) {
-        in(i).c <> io_in(i).c
+        in(i).c :<> io_in(i).c
         in(i).c.bits.source := io_in(i).c.bits.source | UInt(r.start)
       } else {
         in(i).c.valid := Bool(false)
@@ -135,7 +148,7 @@ class TLXbar(policy: TLArbiter.Policy = TLArbiter.roundRobin)(implicit p: Parame
       }
 
       if (connectDIO(i).exists(x=>x)) {
-        io_in(i).d <> in(i).d
+        io_in(i).d :<> in(i).d
         io_in(i).d.bits.source := trim(in(i).d.bits.source, r.size)
       } else {
         in(i).d.ready := Bool(true)
@@ -143,7 +156,7 @@ class TLXbar(policy: TLArbiter.Policy = TLArbiter.roundRobin)(implicit p: Parame
       }
 
       if (connectEIO(i).exists(x=>x)) {
-        in(i).e <> io_in(i).e
+        in(i).e :<> io_in(i).e
       } else {
         in(i).e.valid := Bool(false)
         io_in(i).e.ready := Bool(true)
@@ -156,28 +169,28 @@ class TLXbar(policy: TLArbiter.Policy = TLArbiter.roundRobin)(implicit p: Parame
       val r = outputIdRanges(o)
 
       if (connectAOI(o).exists(x=>x)) {
-        io_out(o).a <> out(o).a
+        io_out(o).a :<> out(o).a
       } else {
         out(o).a.ready := Bool(true)
         io_out(o).a.valid := Bool(false)
       }
 
       if (connectBOI(o).exists(x=>x)) {
-        out(o).b <> io_out(o).b
+        out(o).b :<> io_out(o).b
       } else {
         out(o).b.valid := Bool(false)
         io_out(o).b.ready := Bool(true)
       }
 
       if (connectCOI(o).exists(x=>x)) {
-        io_out(o).c <> out(o).c
+        io_out(o).c :<> out(o).c
       } else {
         out(o).c.ready := Bool(true)
         io_out(o).c.valid := Bool(false)
       }
 
       if (connectDOI(o).exists(x=>x)) {
-        out(o).d <> io_out(o).d
+        out(o).d :<> io_out(o).d
         out(o).d.bits.sink := io_out(o).d.bits.sink | UInt(r.start)
       } else {
         out(o).d.valid := Bool(false)
@@ -185,7 +198,7 @@ class TLXbar(policy: TLArbiter.Policy = TLArbiter.roundRobin)(implicit p: Parame
       }
 
       if (connectEOI(o).exists(x=>x)) {
-        io_out(o).e <> out(o).e
+        io_out(o).e :<> out(o).e
         io_out(o).e.bits.sink := trim(out(o).e.bits.sink, r.size)
       } else {
         out(o).e.ready := Bool(true)
@@ -219,7 +232,7 @@ class TLXbar(policy: TLArbiter.Policy = TLArbiter.roundRobin)(implicit p: Parame
 
     // Print the ID mapping
     if (false) {
-      println(s"XBar ${name} mapping:")
+      println(s"XBar mapping:")
       (edgesIn zip inputIdRanges).zipWithIndex.foreach { case ((edge, id), i) =>
         println(s"\t$i assigned ${id} for ${edge.client.clients.map(_.name).mkString(", ")}")
       }
@@ -261,18 +274,15 @@ class TLXbar(policy: TLArbiter.Policy = TLArbiter.roundRobin)(implicit p: Parame
       TLArbiter(policy)(in(i).d, filter(beatsDO zip portsDIO(i), connectDIO(i)):_*)
     }
   }
-}
 
-object TLXbar
-{
   def apply(policy: TLArbiter.Policy = TLArbiter.roundRobin)(implicit p: Parameters): TLNode =
   {
     val xbar = LazyModule(new TLXbar(policy))
     xbar.node
   }
 
-  def mapInputIds (ports: Seq[TLClientPortParameters ]) = assignRanges(ports.map(_.endSourceId))
-  def mapOutputIds(ports: Seq[TLManagerPortParameters]) = assignRanges(ports.map(_.endSinkId))
+  def mapInputIds (ports: Seq[TLMasterPortParameters]) = assignRanges(ports.map(_.endSourceId))
+  def mapOutputIds(ports: Seq[TLSlavePortParameters ]) = assignRanges(ports.map(_.endSinkId))
 
   def assignRanges(sizes: Seq[Int]) = {
     val pow2Sizes = sizes.map { z => if (z == 0) 0 else 1 << log2Ceil(z) }

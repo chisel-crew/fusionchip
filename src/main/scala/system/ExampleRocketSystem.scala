@@ -6,12 +6,12 @@ import Chisel._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.subsystem._
+import freechips.rocketchip.prci.SimpleClockGroupSource
 import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.util.DontTouch
 
 /** Example Top with periphery devices and ports, and a Rocket subsystem */
 class ExampleRocketSystem(implicit p: Parameters) extends RocketSubsystem
-    with HasHierarchicalBusTopology
     with HasAsyncExtInterrupts
     with CanHaveMasterAXI4MemPort
     with CanHaveMasterAXI4MMIOPort
@@ -23,8 +23,5 @@ class ExampleRocketSystem(implicit p: Parameters) extends RocketSubsystem
 class ExampleRocketSystemModuleImp[+L <: ExampleRocketSystem](_outer: L) extends RocketSubsystemModuleImp(_outer)
     with HasRTCModuleImp
     with HasExtInterruptsModuleImp
-    with CanHaveMasterAXI4MemPortModuleImp
-    with CanHaveMasterAXI4MMIOPortModuleImp
-    with CanHaveSlaveAXI4PortModuleImp
     with HasPeripheryBootROMModuleImp
     with DontTouch

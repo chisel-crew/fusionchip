@@ -157,6 +157,7 @@ object TLHints
 
   def PREFETCH_READ  = UInt(0, width)
   def PREFETCH_WRITE = UInt(1, width)
+  def isHints(x: UInt) = x <= PREFETCH_WRITE
 
   def HintsMsg:Seq[String] = Seq("PrefetchRead", "PrefetchWrite")
 }
@@ -178,7 +179,8 @@ final class TLBundleA(params: TLBundleParameters)
   val size    = UInt(width = params.sizeBits)
   val source  = UInt(width = params.sourceBits) // from
   val address = UInt(width = params.addressBits) // to
-  val user    = if (params.aUserBits > 0) Some(UInt(width = params.aUserBits)) else None
+  val user    = BundleMap(params.requestFields)
+  val echo    = BundleMap(params.echoFields)
   // variable fields during multibeat:
   val mask    = UInt(width = params.dataBits/8)
   val data    = UInt(width = params.dataBits)
@@ -226,7 +228,8 @@ final class TLBundleD(params: TLBundleParameters)
   val source  = UInt(width = params.sourceBits) // to
   val sink    = UInt(width = params.sinkBits)   // from
   val denied  = Bool() // implies corrupt iff *Data
-  val user    = if (params.dUserBits > 0) Some(UInt(width = params.dUserBits)) else None
+  val user    = BundleMap(params.responseFields)
+  val echo    = BundleMap(params.echoFields)
   // variable fields during multibeat:
   val data    = UInt(width = params.dataBits)
   val corrupt = Bool() // only applies to *Data messages

@@ -38,11 +38,48 @@ class DebugLogicalTreeNode(
   dmOuter: () => TLDebugModuleOuterAsync,
   dmInner: () => TLDebugModuleInnerAsync
 )(implicit val p: Parameters) extends LogicalTreeNode(() => Some(device)) {
+  /**
+   * Translate register field offsets to account for the fact that the dmOuter
+   * registers are offset from the base DebugModule address.
+   *
+   * Although the rocket-chip regmap helper takes offsets that are relative to
+   * the base of the register address block, for the Object Model we have
+   * decided to collapse the two separate DebugModule register address blocks
+   * into a single one, so we need to account for the dmOuter offset.
+   */
+  private def translateDMOuterRegisterOffsets(regMap: OMRegisterMap): OMRegisterMap = {
+    val addressSets = dmOuter().dmOuter.dmiNode.address
+    addressSets.foreach { addressSet =>
+      require(
+        addressSet.contiguous,
+        s"DebugLogicalTree address logic currently assumes contiguous AddressSets; ${addressSet} is not contiguous"
+      )
+    }
+
+    val baseAddressBytes = addressSets.map(_.base).reduceLeft(_ min _)
+
+    regMap.copy(
+      registerFields = regMap.registerFields.map(
+        field => field.copy(
+          bitRange = field.bitRange.copy(
+            base = field.bitRange.base + baseAddressBytes * 8
+          )
+        )
+      )
+    )
+  }
+
   def getOMDebug(resourceBindings: ResourceBindings): Seq[OMComponent] = {
     val nComponents: Int = dmOuter().dmOuter.module.getNComponents()
     val needCustom: Boolean = dmInner().dmInner.module.getNeedCustom()
-    val omRegMap: OMRegisterMap = dmInner().dmInner.module.omRegMap
+    val omInnerRegMap: OMRegisterMap = dmInner().dmInner.module.omRegMap
+    val omOuterRegMap: OMRegisterMap = translateDMOuterRegisterOffsets(dmOuter().dmOuter.module.omRegMap)
     val cfg: DebugModuleParams = dmInner().dmInner.getCfg()
+
+    val omRegMap = OMRegisterMap(
+      registerFields = omInnerRegMap.registerFields ++ omOuterRegMap.registerFields,
+      groups = omInnerRegMap.groups ++ omOuterRegMap.groups
+    )
 
     val memRegions :Seq[OMMemoryRegion] = DiplomaticObjectModelAddressing
       .getOMMemoryRegions("Debug", resourceBindings, Some(omRegMap))
@@ -90,7 +127,8 @@ class DebugLogicalTreeNode(
         hasCustom = needCustom,
         hasAbstractPostIncrement = false,
         hasAbstractPostExec = true,
-        hasClockGate = cfg.clockGate
+        hasClockGate = cfg.clockGate,
+        crossingHasSafeReset = cfg.crossingHasSafeReset
     )
     )
   }

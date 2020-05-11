@@ -3,6 +3,7 @@
 package freechips.rocketchip.diplomacy
 
 import Chisel._
+import chisel3.util.{IrrevocableIO,ReadyValidIO}
 import freechips.rocketchip.util.{ShiftQueue, RationalDirection, FastToSlow, AsyncQueueParams}
 import scala.reflect.ClassTag
 
@@ -97,15 +98,26 @@ case class TransferSizes(min: Int, max: Int)
     if (x.max < min || max < x.min) TransferSizes.none
     else TransferSizes(scala.math.max(min, x.min), scala.math.min(max, x.max))
   
-  def smallestintervalcover(x: TransferSizes) = TransferSizes(if (min == 0 || x.min == 0) scala.math.max(min, x.min) else scala.math.min(min, x.min), scala.math.max(max, x.max))
+  // Not a union, because the result may contain sizes contained by neither term
+  def cover(x: TransferSizes) = {
+    if (none) {
+      x
+    } else if (x.none) {
+      this
+    } else {
+      TransferSizes(scala.math.min(min, x.min), scala.math.max(max, x.max))
+    }
+  }
 
   override def toString() = "TransferSizes[%d, %d]".format(min, max)
-
 }
 
 object TransferSizes {
   def apply(x: Int) = new TransferSizes(x)
   val none = new TransferSizes(0)
+
+  def cover(seq: Seq[TransferSizes]) = seq.foldLeft(none)(_ cover _)
+  def intersect(seq: Seq[TransferSizes]) = seq.reduce(_ intersect _)
 
   implicit def asBool(x: TransferSizes) = !x.none
 }
@@ -117,7 +129,7 @@ object TransferSizes {
 case class AddressSet(base: BigInt, mask: BigInt) extends Ordered[AddressSet]
 {
   // Forbid misaligned base address (and empty sets)
-  require ((base & mask) == 0, s"Mis-aligned AddressSets are forbidden, got: ($base, $mask)")
+  require ((base & mask) == 0, s"Mis-aligned AddressSets are forbidden, got: ${this.toString}")
   require (base >= 0, s"AddressSet negative base is ambiguous: $base") // TL2 address widths are not fixed => negative is ambiguous
   // We do allow negative mask (=> ignore all high bits)
 
@@ -256,6 +268,10 @@ case class BufferParams(depth: Int, flow: Boolean, pipe: Boolean)
     if (isDefined) Queue(x, depth, flow=flow, pipe=pipe)
     else x
 
+  def irrevocable[T <: Data](x: ReadyValidIO[T]) =
+    if (isDefined) Queue.irrevocable(x, depth, flow=flow, pipe=pipe)
+    else x
+
   def sq[T <: Data](x: DecoupledIO[T]) =
     if (!isDefined) x else {
       val sq = Module(new ShiftQueue(x.bits, depth, flow=flow, pipe=pipe))
@@ -309,46 +325,4 @@ trait DirectedBuffers[T] {
   def copyIn(x: BufferParams): T
   def copyOut(x: BufferParams): T
   def copyInOut(x: BufferParams): T
-}
-
-trait UserBits {
-  def width: Int
-  require (width >= 0)
-}
-
-case class PadUserBits(width: Int) extends UserBits
-
-case class UserBitField[T <: UserBits](tag: T, value: UInt)
-
-object UserBits {
-  // Highest index fields are returned first in the output
-  def extract[T <: UserBits : ClassTag](meta: Seq[UserBits], userBits: UInt): Seq[UserBitField[T]] = meta match {
-    case Nil => Nil
-    case head :: tail =>
-      tail.scanLeft((head, 0)) {
-        case ((x, base), y) => (y, base+x.width)
-      }.collect {
-        case (x: T, y) => UserBitField(x, userBits(y+x.width-1, y))
-      }.reverse
-  }
-  // Fills highest indexed fields from the front of 'seq' input
-  def inject[T <: UserBits : ClassTag](meta: Seq[UserBits], userBits: UInt, seq: Seq[UInt]): UInt = meta match {
-    case Nil => userBits
-    case head :: tail => {
-      val elts = tail.scanLeft((head, 0)) {
-        case ((x, base), y) => (y, base+x.width)
-      }
-      val mask = ~UInt(elts.collect {
-        case (x: T, y) => ((BigInt(1) << x.width) - 1) << y
-      }.foldLeft(BigInt(0)) {
-        case (b, a) => b | a
-      }, width = meta.map(_.width).sum)
-      val concat = elts.reverse.zip(seq).collect {
-        case ((x: T, y), v) => (v|UInt(0, width=x.width))(x.width-1, 0) << y
-      }.foldLeft(UInt(0)) {
-        case (b, a) => b | a
-      }
-      (userBits & mask) | concat
-    }
-  }
 }

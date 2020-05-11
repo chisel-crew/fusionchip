@@ -2,7 +2,6 @@
 
 package freechips.rocketchip.diplomaticobjectmodel.model
 
-import chisel3.experimental.RawModule
 import freechips.rocketchip.regmapper._
 
 trait OMRange extends OMCompoundType {
@@ -167,7 +166,7 @@ object OMRegister {
         seq.map(_.width).scanLeft(0)(_ + _).zip(seq).map { case (bitOffset, regField) =>
           getRegField(regField, byteOffset, bitOffset)
         }
-    }.sortBy(_.bitRange.base)
+    }.sortBy(_.bitRange.base).filter(_.bitRange.size > 0)
   }
 
   private def makeGroups(mapping: Seq[(Int, Seq[RegField])]): Seq[OMRegFieldGroup] = {
