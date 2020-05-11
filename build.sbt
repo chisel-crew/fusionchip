@@ -1,48 +1,53 @@
 resolvers ++= Seq(
   Resolver.mavenLocal,
-  Resolver.sonatypeRepo("snapshots"),
-  Resolver.sonatypeRepo("releases")
-)
-
-libraryDependencies ++= Seq(
-  "edu.berkeley.cs" %% "chisel3"        % Version.chisel,
-  "edu.berkeley.cs" %% "firrtl"         % Version.firrtl,
-  "org.json4s"      %% "json4s-jackson" % Version.json4s
-)
-
-scalacOptions ++= Seq(
-  "-Xsource:2.11",
-  "-language:reflectiveCalls"
-)
-
-scalacOptions --= Seq(
-  "-Xfatal-warnings"
+  Resolver.sonatypeRepo("releases"),
+  Resolver.sonatypeRepo("snapshots")
 )
 
 lazy val commonSettings = Seq(
-  organization := "Neurodyne",
-  version := "1.2",
-  scalaVersion := "2.12.10",
-  crossScalaVersions := Seq("2.12.10", "2.11.12"),
-  parallelExecution in Global := false,
-  traceLevel := 15,
-  maxErrors := 5
-  //libraryDependencies ++= Seq("org.scala-lang" % "scala-reflect" % scalaVersion.value),
-  //addCompilerPlugin("org.scalamacros"          % "paradise"      % "2.1.1" cross CrossVersion.full)
+// Refine scalac params from tpolecat
+  scalacOptions --= Seq(
+    "-Xfatal-warnings"
+  ),
+  scalacOptions ++= Seq(
+    "-Xsource:2.11",
+    "-language:reflectiveCalls"
+  )
 )
 
-lazy val macros = (project in file("macros")).settings(commonSettings)
-lazy val fusion = (project in file("."))
-  .settings(commonSettings)
-  .dependsOn(macros)
-//.aggregate(macros) // <-- means the running task on rocketchip is also run by aggregate tasks
+lazy val commonDeps = libraryDependencies ++= Seq(
+  "org.json4s" %% "json4s-jackson" % Version.json4s
+)
 
-addCommandAlias("com", "all compile test:compile")
-addCommandAlias("lint", "; compile:scalafix --check ; test:scalafix --check")
+lazy val chiselDeps = libraryDependencies ++= Seq(
+  "edu.berkeley.cs" %% "chisel3" % Version.chisel,
+  "edu.berkeley.cs" %% "firrtl"  % Version.firrtl
+)
+
+lazy val macros = (project in file("macros"))
+  .settings(
+    commonSettings,
+    libraryDependencies ++= Seq("org.scala-lang" % "scala-reflect" % scalaVersion.value)
+  )
+
+lazy val root = (project in file("."))
+  .settings(
+    organization := "Neurodyne",
+    name := "fusion",
+    version := "0.0.1",
+    scalaVersion := "2.12.10",
+    maxErrors := 3,
+    commonSettings,
+    commonDeps,
+    chiselDeps
+  )
+  .dependsOn(macros)
+
+// Aliases
+addCommandAlias("rel", "reload")
+addCommandAlias("com", "all compile test:compile it:compile")
 addCommandAlias("fix", "all compile:scalafix test:scalafix")
-//addCommandAlias("fmt", "; scalafmtSbt; scalafmtAll; test:scalafmtAll")
 addCommandAlias("fmt", "; scalafmtSbt")
-addCommandAlias("chk", "; scalafmtSbtCheck; scalafmtCheck; test:scalafmtCheck")
-addCommandAlias("cov", "; clean; coverage; test; coverageReport")
+//addCommandAlias("fmt", "all scalafmtSbt scalafmtAll")
 
 scalafixDependencies in ThisBuild += "com.nequissimus" %% "sort-imports" % "0.5.0"
