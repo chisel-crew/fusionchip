@@ -25,37 +25,40 @@ lazy val chiselDeps = libraryDependencies ++= Seq(
   "edu.berkeley.cs" %% "firrtl"  % Version.firrtl
 )
 
-lazy val zioDeps = libraryDependencies ++= Seq(
-  "dev.zio" %% "zio-test"     % Version.zio % "test",
-  "dev.zio" %% "zio-test-sbt" % Version.zio % "test"
-)
-
 lazy val macros = (project in file("macros"))
   .settings(
     commonSettings,
     libraryDependencies ++= Seq("org.scala-lang" % "scala-reflect" % scalaVersion.value)
   )
 
-lazy val root = (project in file("."))
+lazy val core = (project in file("core"))
   .settings(
-    organization := "Neurodyne",
-    name := "fusion",
-    version := "0.0.1",
+    name := "core",
     scalaVersion := "2.12.10",
     maxErrors := 3,
     commonSettings,
     commonDeps,
-    zioDeps,
     chiselDeps,
-    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
-    testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework"))
+    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full)
   )
   .dependsOn(macros)
+
+lazy val blocks = (project in file("sifive-blocks"))
+  .dependsOn(core)
+  .settings(commonSettings)
+
+lazy val root = (project in file("."))
+  .dependsOn(core, blocks)
+  .settings(
+    name := "fusion",
+    commonSettings
+  )
 
 // Aliases
 addCommandAlias("rel", "reload")
 addCommandAlias("com", "all compile test:compile it:compile")
 addCommandAlias("fix", "all compile:scalafix test:scalafix")
-addCommandAlias("fmt", "all scalafmtSbt scalafmtAll")
+//addCommandAlias("fmt", "all scalafmtSbt scalafmtAll")
+addCommandAlias("fmt", "all scalafmtSbt")
 
 scalafixDependencies in ThisBuild += "com.nequissimus" %% "sort-imports" % "0.5.0"
