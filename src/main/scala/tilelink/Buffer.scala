@@ -2,10 +2,11 @@
 
 package freechips.rocketchip.tilelink
 
+import scala.math.{min,max}
+
 import Chisel._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
-import scala.math.{min,max}
 
 class TLBufferNode (
   a: BufferParams,

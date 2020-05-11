@@ -2,8 +2,9 @@
 
 package freechips.rocketchip.util
 
-import Chisel._
 import scala.collection.mutable.{HashMap}
+
+import Chisel._
 
 case class ROMConfig(name: String, depth: Int, width: Int)
 

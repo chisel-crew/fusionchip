@@ -3,7 +3,6 @@
 package freechips.rocketchip.tile
 
 import chisel3._
-
 import freechips.rocketchip.config.Parameters
 
 case class CustomCSR(id: Int, mask: BigInt, init: Option[BigInt])

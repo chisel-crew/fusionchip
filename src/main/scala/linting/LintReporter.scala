@@ -2,14 +2,15 @@
 
 package freechips.rocketchip.linting
 
+import scala.collection.mutable
+
+import chisel3.experimental.ChiselAnnotation
 import firrtl._
-import firrtl.ir._
-import firrtl.traversals.Foreachers._
 import firrtl.annotations.NoTargetAnnotation
+import firrtl.ir._
 import firrtl.options.{OptionsException, RegisteredLibrary, ShellOption, PreservesAll, Dependency}
 import firrtl.stage.RunFirrtlTransformAnnotation
-import chisel3.experimental.ChiselAnnotation
-import scala.collection.mutable
+import firrtl.traversals.Foreachers._
 
 /** The final transform for all linting
   * Collects all computer lint violations and displays them

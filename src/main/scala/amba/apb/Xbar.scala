@@ -2,12 +2,13 @@
 
 package freechips.rocketchip.amba.apb
 
+import scala.math.{min,max}
+
 import Chisel._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.util._
 import freechips.rocketchip.regmapper._
-import scala.math.{min,max}
+import freechips.rocketchip.util._
 
 class APBFanout()(implicit p: Parameters) extends LazyModule {
   val node = APBNexusNode(

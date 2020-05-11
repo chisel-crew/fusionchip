@@ -3,7 +3,6 @@
 package freechips.rocketchip.rocket
 
 import Chisel._
-
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
 
@@ -58,7 +57,7 @@ object TLBPageLookup
     val allSizes = TransferSizes(1, cacheBlockBytes)
     val amoSizes = TransferSizes(4, xLen/8)
 
-    val permissions = managers.foreach { m =>
+    managers.foreach { m =>
       require (!m.supportsGet        || m.supportsGet       .contains(allSizes),  s"Memory region '${m.name}' at ${m.address} only supports ${m.supportsGet} Get, but must support ${allSizes}")
       require (!m.supportsPutFull    || m.supportsPutFull   .contains(allSizes),  s"Memory region '${m.name}' at ${m.address} only supports ${m.supportsPutFull} PutFull, but must support ${allSizes}")
       require (!m.supportsPutPartial || m.supportsPutPartial.contains(allSizes),  s"Memory region '${m.name}' at ${m.address} only supports ${m.supportsPutPartial} PutPartial, but must support ${allSizes}")

@@ -2,6 +2,7 @@
 
 package freechips.rocketchip.subsystem
 
+import CoherenceManagerWrapper._
 import chisel3.util.isPow2
 import freechips.rocketchip.config._
 import freechips.rocketchip.devices.tilelink.BuiltInDevices
@@ -9,7 +10,6 @@ import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.interrupts._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.util._
-import CoherenceManagerWrapper._
 
 /** Global cache coherence granularity, which applies to all caches, for now. */
 case object CacheBlockBytes extends Field[Int](64)

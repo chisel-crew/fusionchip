@@ -2,9 +2,10 @@
 
 package freechips.rocketchip.util
 
+import scala.collection.immutable.ListMap
+
 import Chisel._
 import chisel3.Record
-import scala.collection.immutable.ListMap
 
 final case class HeterogeneousBag[T <: Data](elts: Seq[T]) extends Record with collection.IndexedSeq[T] {
   def apply(x: Int) = elts(x)

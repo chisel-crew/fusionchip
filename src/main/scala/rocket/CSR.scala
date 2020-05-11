@@ -3,15 +3,16 @@
 
 package freechips.rocketchip.rocket
 
-import Chisel._
+import scala.collection.mutable.LinkedHashMap
+
 import Chisel.ImplicitConversions._
+import Chisel._
+import Instructions._
 import chisel3.withClock
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.tile._
 import freechips.rocketchip.util._
 import freechips.rocketchip.util.property._
-import scala.collection.mutable.LinkedHashMap
-import Instructions._
 
 class MStatus extends Bundle {
   // not truly part of mstatus, but convenient

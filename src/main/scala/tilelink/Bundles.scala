@@ -2,11 +2,12 @@
 
 package freechips.rocketchip.tilelink
 
+import scala.collection.immutable.ListMap
+
 import Chisel._
 import chisel3.util.{ReadyValidIO}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.util._
-import scala.collection.immutable.ListMap
 
 abstract class TLBundleBase(params: TLBundleParameters) extends GenericParameterizedBundle(params)
 
@@ -263,7 +264,7 @@ class TLBundle(val params: TLBundleParameters) extends Record
     if (params.hasBCE) ListMap("e" -> e, "d" -> d, "c" -> c, "b" -> b, "a" -> a)
     else ListMap("d" -> d, "a" -> a)
 
-  def tieoff() {
+  def tieoff(): Unit = {
     a.ready.dir match {
       case INPUT =>
         a.ready := Bool(false)

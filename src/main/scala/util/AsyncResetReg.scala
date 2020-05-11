@@ -3,9 +3,8 @@
 package freechips.rocketchip.util
 
 import Chisel.{defaultCompileOptions => _, _}
-import freechips.rocketchip.util.CompileOptions.NotStrictInferReset
-
 import chisel3.{withClockAndReset, withReset, RawModule}
+import freechips.rocketchip.util.CompileOptions.NotStrictInferReset
 
 /** This black-boxes an Async Reset
   *  (or Set)

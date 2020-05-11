@@ -3,11 +3,10 @@
 package freechips.rocketchip.regmapper
 
 import Chisel._
-
+import chisel3.internal.sourceinfo.{SourceInfo, SourceLine}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.util._
 import freechips.rocketchip.util.property._
-import chisel3.internal.sourceinfo.{SourceInfo, SourceLine}
 
 // A bus agnostic register interface to a register-based device
 

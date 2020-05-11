@@ -3,11 +3,11 @@
 
 package freechips.rocketchip.rocket
 
+import ALU._
+import Chisel.ImplicitConversions._
 import chisel3._
 import chisel3.util.{Cat, log2Up, log2Ceil, log2Floor, Log2, Decoupled, Enum, Fill, Valid, Pipe}
-import Chisel.ImplicitConversions._
 import freechips.rocketchip.util._
-import ALU._
 
 class MultiplierReq(dataBits: Int, tagBits: Int) extends Bundle {
   val fn = Bits(SZ_ALU_FN.W)

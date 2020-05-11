@@ -40,10 +40,10 @@ class SeqRandom(n_ways: Int) extends SeqReplacementPolicy {
 class PseudoLRU(n: Int)
 {
   private val state_reg = Reg(UInt(width = n-1))
-  def access(way: UInt) {
+  def access(way: UInt): Unit = {
     state_reg := get_next_state(state_reg,way)
   }
-  def access(ways: Seq[ValidIO[UInt]]) {
+  def access(ways: Seq[ValidIO[UInt]]): Unit = {
     state_reg := ways.foldLeft(state_reg)((prev, way) => Mux(way.valid, get_next_state(prev, way.bits), prev))
   }
   def get_next_state(state: UInt, way: UInt) = {

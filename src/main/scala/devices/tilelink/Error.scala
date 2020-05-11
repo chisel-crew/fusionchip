@@ -2,16 +2,16 @@
 
 package freechips.rocketchip.devices.tilelink
 
+import scala.math.min
+
 import Chisel._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.tilelink._
-import freechips.rocketchip.util._
-import scala.math.min
-
-import freechips.rocketchip.diplomaticobjectmodel.{DiplomaticObjectModelAddressing, HasLogicalTreeNode}
 import freechips.rocketchip.diplomaticobjectmodel.logicaltree.LogicalTreeNode
 import freechips.rocketchip.diplomaticobjectmodel.model.{OMErrorDevice, OMComponent}
+import freechips.rocketchip.diplomaticobjectmodel.{DiplomaticObjectModelAddressing, HasLogicalTreeNode}
+import freechips.rocketchip.tilelink._
+import freechips.rocketchip.util._
 
 /** Adds a /dev/null slave that generates TL error response messages */
 class TLError(params: DevNullParams, buffer: Boolean = true, beatBytes: Int = 4)(implicit p: Parameters)

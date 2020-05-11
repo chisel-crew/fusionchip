@@ -11,11 +11,11 @@ class EventSet(gate: (UInt, UInt) => Bool, events: Seq[(String, () => Bool)]) {
   def size = events.size
   def hits = events.map(_._2()).asUInt
   def check(mask: UInt) = gate(mask, hits)
-  def dump() {
+  def dump(): Unit = {
     for (((name, _), i) <- events.zipWithIndex)
       when (check(1.U << i)) { printf(s"Event $name\n") }
   }
-  def withCovers {
+  def withCovers: Unit = {
     events.zipWithIndex.foreach {
       case ((name, func), i) => cover(gate((1.U << i), (func() << i)), name)
     }
@@ -60,7 +60,7 @@ class SuperscalarEventSets(eventSets: Seq[(Seq[EventSet], (UInt, UInt) => UInt)]
 
   def toScalarEventSets: EventSets = new EventSets(eventSets.map(_._1.head))
 
-  def cover() { eventSets.foreach(_._1.foreach(_.withCovers)) }
+  def cover(): Unit = { eventSets.foreach(_._1.foreach(_.withCovers)) }
 
   private def decode(counter: UInt): (UInt, UInt) = {
     require(eventSetIdBits > 0)

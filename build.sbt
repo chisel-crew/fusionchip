@@ -11,7 +11,8 @@ lazy val commonSettings = Seq(
   ),
   scalacOptions ++= Seq(
     "-Xsource:2.11",
-    "-language:reflectiveCalls"
+    "-language:reflectiveCalls",
+    "-language:postfixOps"
   )
 )
 
@@ -22,6 +23,11 @@ lazy val commonDeps = libraryDependencies ++= Seq(
 lazy val chiselDeps = libraryDependencies ++= Seq(
   "edu.berkeley.cs" %% "chisel3" % Version.chisel,
   "edu.berkeley.cs" %% "firrtl"  % Version.firrtl
+)
+
+lazy val zioDeps = libraryDependencies ++= Seq(
+  "dev.zio" %% "zio-test"     % Version.zio % "test",
+  "dev.zio" %% "zio-test-sbt" % Version.zio % "test"
 )
 
 lazy val macros = (project in file("macros"))
@@ -39,8 +45,10 @@ lazy val root = (project in file("."))
     maxErrors := 3,
     commonSettings,
     commonDeps,
+    zioDeps,
     chiselDeps,
-    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full)
+    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
+    testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework"))
   )
   .dependsOn(macros)
 
@@ -48,7 +56,7 @@ lazy val root = (project in file("."))
 addCommandAlias("rel", "reload")
 addCommandAlias("com", "all compile test:compile it:compile")
 addCommandAlias("fix", "all compile:scalafix test:scalafix")
-addCommandAlias("fmt", "; scalafmtSbt")
-//addCommandAlias("fmt", "all scalafmtSbt scalafmtAll")
+// addCommandAlias("fmt", "all scalafmtSbt scalafmtAll")
+addCommandAlias("fmt", "all scalafmtSbt")
 
 scalafixDependencies in ThisBuild += "com.nequissimus" %% "sort-imports" % "0.5.0"

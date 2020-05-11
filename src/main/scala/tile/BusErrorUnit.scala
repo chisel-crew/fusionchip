@@ -2,22 +2,22 @@
 
 package freechips.rocketchip.tile
 
-import Chisel._
 import Chisel.ImplicitConversions._
-import chisel3.util.Valid
+import Chisel._
 import chisel3.DontCare
+import chisel3.util.Valid
 import freechips.rocketchip.config.Parameters
-import freechips.rocketchip.util._
-import freechips.rocketchip.rocket._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.diplomaticobjectmodel.logicaltree.{
   BusErrorLogicalTreeNode,
   LogicalModuleTree,
   LogicalTreeNode
 }
-import freechips.rocketchip.regmapper._
-import freechips.rocketchip.tilelink._
 import freechips.rocketchip.interrupts._
+import freechips.rocketchip.regmapper._
+import freechips.rocketchip.rocket._
+import freechips.rocketchip.tilelink._
+import freechips.rocketchip.util._
 import freechips.rocketchip.util.property._
 
 trait BusErrors extends Bundle {

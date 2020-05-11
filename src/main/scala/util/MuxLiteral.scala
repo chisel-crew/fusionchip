@@ -2,8 +2,9 @@
 
 package freechips.rocketchip.util
 
-import Chisel._
 import scala.reflect.ClassTag
+
+import Chisel._
 
 /* MuxLiteral creates a lookup table from a key to a list of values.
  * Unlike MuxLookup, the table keys must be exclusive literals.

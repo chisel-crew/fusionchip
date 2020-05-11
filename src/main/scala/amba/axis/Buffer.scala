@@ -1,13 +1,12 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.amba.axis
-
 import chisel3._
 import chisel3.util._
 import freechips.rocketchip.config._
-import freechips.rocketchip.util._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
+import freechips.rocketchip.util._
 
 class AXISBuffer(val params: BufferParams)(implicit p: Parameters) extends LazyModule
 {

@@ -6,18 +6,18 @@ import chisel3._
 import chisel3.util._
 import freechips.rocketchip.amba._
 import freechips.rocketchip.config._
+import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.regmapper._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.util._
 import freechips.rocketchip.util.property._
-import freechips.rocketchip.devices.debug._
+
 
 object SystemBusAccessState extends scala.Enumeration {
    type SystemBusAccessState = Value
    val Idle, SBReadRequest, SBWriteRequest, SBReadResponse, SBWriteResponse = Value
 }
-import SystemBusAccessState._ 
 
 object SBErrorCode extends scala.Enumeration {
   type SBErrorCode = Value
@@ -30,13 +30,14 @@ object SBErrorCode extends scala.Enumeration {
 }
 import SBErrorCode._
 
+
 object SystemBusAccessModule
 {
   def apply(sb2tl: SBToTL, dmactive: Bool, dmAuthenticated: Bool)(implicit p: Parameters):
     (Seq[RegField], Seq[Seq[RegField]], Seq[Seq[RegField]]) =
   {
-    import SBErrorCode._
-    import DMI_RegAddrs._
+import DMI_RegAddrs._
+import SBErrorCode._
 
     val cfg = p(DebugModuleKey).get
 

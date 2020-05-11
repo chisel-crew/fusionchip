@@ -1,12 +1,12 @@
 // See LICENSE.SiFive for license details.
 package freechips.rocketchip.prci
+import scala.math.max
 
 import chisel3._
 import chisel3.internal.sourceinfo.SourceInfo
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy.{InModuleBody, ModuleValue, ValName}
 import freechips.rocketchip.util.{HeterogeneousBag}
-import scala.math.max
 
 // All Clock parameters specify only the PLL values required at power-on
 // Dynamic control of the PLL from software can take the values out-of-range

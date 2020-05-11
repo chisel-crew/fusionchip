@@ -2,7 +2,6 @@
 
 package freechips.rocketchip.diplomaticobjectmodel.model
 
-
 import freechips.rocketchip.rocket.RocketCoreParams
 import freechips.rocketchip.tile.{CoreParams, RocketTile}
 import freechips.rocketchip.util.BooleanToAugmentedBoolean

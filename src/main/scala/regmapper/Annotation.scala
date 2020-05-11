@@ -1,9 +1,8 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.regmapper
-
-import chisel3.experimental.{ChiselAnnotation, RunFirrtlTransform}
 import chisel3.RawModule
+import chisel3.experimental.{ChiselAnnotation, RunFirrtlTransform}
 import firrtl.annotations._
 import firrtl.{CircuitForm, CircuitState, LowForm, Transform}
 

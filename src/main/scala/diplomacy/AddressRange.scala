@@ -1,7 +1,6 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.diplomacy
-
 import Chisel._
 
 // Use AddressSet instead -- this is just for pretty printing

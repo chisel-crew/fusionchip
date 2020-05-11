@@ -7,8 +7,8 @@ import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.diplomaticobjectmodel.logicaltree.{BusMemoryLogicalTreeNode, LogicalModuleTree, LogicalTreeNode}
 import freechips.rocketchip.diplomaticobjectmodel.model.AHB_Lite
-import freechips.rocketchip.util._
 import freechips.rocketchip.tilelink.LFSRNoiseMaker
+import freechips.rocketchip.util._
 
 class AHBRAM(
     address: AddressSet,

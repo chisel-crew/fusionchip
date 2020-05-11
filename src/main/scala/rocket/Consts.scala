@@ -2,9 +2,10 @@
 
 package freechips.rocketchip.rocket.constants
 
+import scala.math._
+
 import Chisel._
 import freechips.rocketchip.util._
-import scala.math._
 
 trait ScalarOpConstants {
   val SZ_BR = 3

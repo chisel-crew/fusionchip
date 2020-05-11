@@ -5,9 +5,9 @@ package freechips.rocketchip.groundtest
 
 import Chisel._
 import freechips.rocketchip.config.Config
+import freechips.rocketchip.rocket.{DCacheParams}
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.system.BaseConfig
-import freechips.rocketchip.rocket.{DCacheParams}
 import freechips.rocketchip.tile.{MaxHartIdBits, XLen}
 
 /** Actual testing target Configs */

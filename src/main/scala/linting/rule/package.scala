@@ -2,9 +2,10 @@
 
 package freechips.rocketchip.linting
 
+import scala.collection.mutable
+
 import firrtl._
 import firrtl.ir._
-import scala.collection.mutable
 
 package object rule {
   /** Determines whether name is prepended with an underscore, indicating a bad name

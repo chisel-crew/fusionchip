@@ -5,8 +5,8 @@ package freechips.rocketchip.amba.axi4
 import Chisel._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.tilelink._
 import freechips.rocketchip.subsystem.CrossingWrapper
+import freechips.rocketchip.tilelink._
 import freechips.rocketchip.util._
 
 class AXI4AsyncCrossingSource(sync: Option[Int])(implicit p: Parameters) extends LazyModule

@@ -3,8 +3,8 @@ package freechips.rocketchip.formal
 
 import Chisel._
 import chisel3.{VecInit}
-import chisel3.util.Cat
 import chisel3.internal.sourceinfo.{SourceInfo, SourceLine}
+import chisel3.util.Cat
 import freechips.rocketchip.config.Field
 
 sealed abstract class MonitorDirection(name: String) {
@@ -66,7 +66,7 @@ object Property {
     }
     val proposed_src = if (custom_name == "") prop_type.toString + "_" + line_info else custom_name
 
-    val src_wrap = s"@[${proposed_src}]"
+    s"@[${proposed_src}]"
     if (dir==MonitorDirection.Monitor) {
       when(!cond) {
         printf(s"assert:${proposed_src}:${prop_type.toString} ${message + "_" + line_info}")
@@ -130,7 +130,7 @@ object SourceGet {
 object ResetUtils {
   def inactive_output_override[T <: Data](inactive_length: Int)
                                          (sigs: T,
-                                          override_assn: (T)=>Unit) {
+                                          override_assn: (T)=>Unit): Unit = {
     require(inactive_length >= 0)
 
     if(inactive_length>0) {

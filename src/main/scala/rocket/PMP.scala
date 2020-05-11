@@ -2,9 +2,9 @@
 
 package freechips.rocketchip.rocket
 
+import Chisel.ImplicitConversions._
 import chisel3._
 import chisel3.util.{Cat, log2Ceil}
-import Chisel.ImplicitConversions._
 import freechips.rocketchip.config._
 import freechips.rocketchip.tile._
 import freechips.rocketchip.util._
@@ -35,7 +35,7 @@ class PMPReg(implicit p: Parameters) extends CoreBundle()(p) {
   val cfg = new PMPConfig
   val addr = UInt((paddrBits - PMP.lgAlign).W)
 
-  def reset() {
+  def reset(): Unit = {
     cfg.a := 0
     cfg.l := 0
   }

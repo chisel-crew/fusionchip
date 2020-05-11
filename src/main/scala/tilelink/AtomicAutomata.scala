@@ -2,11 +2,12 @@
 
 package freechips.rocketchip.tilelink
 
+import scala.math.{min,max}
+
 import Chisel._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.util._
-import scala.math.{min,max}
 
 // Ensures that all downstream RW managers support Atomic operationss.
 // If !passthrough, intercept all Atomics. Otherwise, only intercept those unsupported downstream.
