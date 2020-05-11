@@ -1,7 +1,6 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.diplomacy
-
 import scala.math.{max,min}
 
 import Chisel.log2Ceil

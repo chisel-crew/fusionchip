@@ -2,7 +2,6 @@
 // See LICENSE.Berkeley for license details.
 
 package freechips.rocketchip.rocket
-
 import Chisel.ImplicitConversions._
 import Chisel._
 import freechips.rocketchip.config.Parameters

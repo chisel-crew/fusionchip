@@ -2,7 +2,6 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.rocket
-
 import scala.collection.immutable.ListMap
 import scala.collection.mutable.ArrayBuffer
 

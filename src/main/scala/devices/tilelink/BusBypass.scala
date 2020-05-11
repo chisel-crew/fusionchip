@@ -1,7 +1,6 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.devices.tilelink
-
 import scala.math.min
 
 import Chisel._

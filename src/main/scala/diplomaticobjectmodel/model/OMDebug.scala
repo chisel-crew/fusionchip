@@ -2,19 +2,18 @@
 
 package freechips.rocketchip.diplomaticobjectmodel.model
 
-
 import freechips.rocketchip.config._
-import freechips.rocketchip.devices.debug.{DebugModuleParams, ExportDebug}
+import freechips.rocketchip.devices.debug.{ DebugModuleParams, ExportDebug }
 
 sealed trait OMDebugInterfaceType extends OMEnum
-case object JTAG extends OMDebugInterfaceType
-case object CJTAG extends OMDebugInterfaceType
-case object DMI extends OMDebugInterfaceType
-case object DebugAPB extends OMDebugInterfaceType
+case object JTAG                  extends OMDebugInterfaceType
+case object CJTAG                 extends OMDebugInterfaceType
+case object DMI                   extends OMDebugInterfaceType
+case object DebugAPB              extends OMDebugInterfaceType
 
 sealed trait OMDebugAuthenticationType extends OMEnum
-case object NONE extends OMDebugAuthenticationType
-case object PASSTHRU extends OMDebugAuthenticationType
+case object NONE                       extends OMDebugAuthenticationType
+case object PASSTHRU                   extends OMDebugAuthenticationType
 
 // These directly come from RISC-V Debug Spec 0.14
 case class OMDebug(
@@ -52,11 +51,11 @@ case class OMDebug(
   hasAbstractAccessFPU: Boolean,
   hasAbstractAccessCSR: Boolean,
   hasAbstractAccessMemory: Boolean, // There is a bunch more stuff if this is true, but we're ignoring it because we didn't and won't implement it.
-  hasCustom: Boolean, // (This makes some registers visible in the non-standard extensions range. More info would be necessary for exactly what registers)
+  hasCustom: Boolean,               // (This makes some registers visible in the non-standard extensions range. More info would be necessary for exactly what registers)
   hasAbstractPostIncrement: Boolean,
   hasAbstractPostExec: Boolean,
   hasClockGate: Boolean,
-  crossingHasSafeReset: Boolean,   // Do async crossings have "safe" reset logic
+  crossingHasSafeReset: Boolean, // Do async crossings have "safe" reset logic
   _types: Seq[String] = Seq("OMDebug", "OMDevice", "OMComponent", "OMCompoundType")
 ) extends OMDevice
 

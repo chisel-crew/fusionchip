@@ -5,7 +5,8 @@ package freechips.rocketchip.tilelink
 import Chisel._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.devices.tilelink._
-// TODO This class should be moved to package subsystem to resolve//      the dependency awkwardness of the following imports
+// TODO This class should be moved to package subsystem to resolve
+// the dependency awkwardness of the following imps
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.prci._
 import freechips.rocketchip.subsystem._

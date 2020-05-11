@@ -4,6 +4,9 @@ package freechips.rocketchip.rocket
 
 import Chisel._
 import Chisel.ImplicitConversions._
+import chisel3.experimental.{ chiselName, NoChiselNamePrefix }
+import chisel3.internal.sourceinfo.SourceInfo
+import chisel3.{ dontTouch, withClock, DontCare, WireInit }
 import freechips.rocketchip.amba._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
@@ -12,10 +15,7 @@ import freechips.rocketchip.tile.{ CoreBundle, LookupByHartId }
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.util._
 import freechips.rocketchip.util.property._
-import chisel3.{ dontTouch, withClock, DontCare, WireInit }
-import chisel3.experimental.{ chiselName, NoChiselNamePrefix }
-import chisel3.internal.sourceinfo.SourceInfo
-import TLMessages._
+import freechips.rocketchip.tilelink.TLMessages._
 
 // TODO: delete this trait once deduplication is smart enough to avoid globally inlining matching circuits
 trait InlineInstance { self: chisel3.experimental.BaseModule =>

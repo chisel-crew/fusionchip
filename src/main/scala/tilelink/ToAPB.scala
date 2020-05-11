@@ -2,17 +2,14 @@
 
 package freechips.rocketchip.tilelink
 
-import scala.math.{ max, min }
-
 import Chisel._
 import freechips.rocketchip.amba._
+import freechips.rocketchip.amba._
+import freechips.rocketchip.amba.apb._
 import freechips.rocketchip.amba.apb._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.amba.apb._
-import freechips.rocketchip.amba._
-import scala.math.{ max, min }
-import APBParameters._
+import freechips.rocketchip.amba.apb.APBParameters._
 
 case class TLToAPBNode()(implicit valName: ValName)
     extends MixedAdapterNode(TLImp, APBImp)(dFn = { cp =>

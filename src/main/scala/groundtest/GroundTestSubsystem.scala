@@ -1,7 +1,6 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.groundtest
-
 import scala.math.max
 
 import Chisel._

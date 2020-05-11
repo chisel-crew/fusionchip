@@ -1,7 +1,6 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.rocket
-
 import Chisel.ImplicitConversions._
 import chisel3._
 import chisel3.util._

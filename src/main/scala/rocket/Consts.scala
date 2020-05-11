@@ -1,7 +1,6 @@
 // See LICENSE.Berkeley for license details.
 
 package freechips.rocketchip.rocket.constants
-
 import scala.math._
 
 import Chisel._

@@ -2,7 +2,6 @@
 // See LICENSE.Berkeley for license details.
 
 package freechips.rocketchip.groundtest
-
 import scala.collection.mutable.ListBuffer
 
 import Chisel._

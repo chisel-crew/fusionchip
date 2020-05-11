@@ -5,6 +5,7 @@ package freechips.rocketchip.tile
 
 import Chisel.ImplicitConversions._
 import Chisel.{ defaultCompileOptions => _, _ }
+import FPConstants._
 import chisel3.experimental.{ chiselName, NoChiselNamePrefix }
 import chisel3.internal.sourceinfo.SourceInfo
 import chisel3.withClock
@@ -14,8 +15,6 @@ import freechips.rocketchip.rocket._
 import freechips.rocketchip.util.CompileOptions.NotStrictInferReset
 import freechips.rocketchip.util._
 import freechips.rocketchip.util.property._
-
-import FPConstants._
 
 case class FPUParams(
   minFLen: Int = 32,
