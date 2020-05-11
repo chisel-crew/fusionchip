@@ -1,11 +1,12 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.diplomacy
+
 import scala.reflect.ClassTag
 
 import Chisel._
-import chisel3.util.{IrrevocableIO,ReadyValidIO}
-import freechips.rocketchip.util.{ShiftQueue, RationalDirection, FastToSlow, AsyncQueueParams}
+import chisel3.util.{ IrrevocableIO, ReadyValidIO }
+import freechips.rocketchip.util.{ AsyncQueueParams, FastToSlow, RationalDirection, ShiftQueue }
 
 /** Options for describing the attributes of memory regions */
 object RegionType {
@@ -25,10 +26,9 @@ object RegionType {
 }
 
 // A non-empty half-open range; [start, end)
-case class IdRange(start: Int, end: Int) extends Ordered[IdRange]
-{
-  require (start >= 0, s"Ids cannot be negative, but got: $start.")
-  require (start <= end, "Id ranges cannot be negative.")
+case class IdRange(start: Int, end: Int) extends Ordered[IdRange] {
+  require(start >= 0, s"Ids cannot be negative, but got: $start.")
+  require(start <= end, "Id ranges cannot be negative.")
 
   def compare(x: IdRange) = {
     val primary   = (this.start - x.start).signum
@@ -39,7 +39,7 @@ case class IdRange(start: Int, end: Int) extends Ordered[IdRange]
   def overlaps(x: IdRange) = start < x.end && x.start < end
   def contains(x: IdRange) = start <= x.start && x.end <= end
 
-  def contains(x: Int)  = start <= x && x < end
+  def contains(x: Int) = start <= x && x < end
   def contains(x: UInt) =
     if (size == 0) {
       Bool(false)
@@ -47,45 +47,45 @@ case class IdRange(start: Int, end: Int) extends Ordered[IdRange]
       x === UInt(start)
     } else {
       // find index of largest different bit
-      val largestDeltaBit = log2Floor(start ^ (end-1))
+      val largestDeltaBit   = log2Floor(start ^ (end - 1))
       val smallestCommonBit = largestDeltaBit + 1 // may not exist in x
-      val uncommonMask = (1 << smallestCommonBit) - 1
-      val uncommonBits = (x | UInt(0, width=smallestCommonBit))(largestDeltaBit, 0)
+      val uncommonMask      = (1 << smallestCommonBit) - 1
+      val uncommonBits      = (x | UInt(0, width = smallestCommonBit))(largestDeltaBit, 0)
       // the prefix must match exactly (note: may shift ALL bits away)
       (x >> smallestCommonBit) === UInt(start >> smallestCommonBit) &&
       // firrtl constant prop range analysis can eliminate these two:
       UInt(start & uncommonMask) <= uncommonBits &&
-      uncommonBits <= UInt((end-1) & uncommonMask)
+      uncommonBits <= UInt((end - 1) & uncommonMask)
     }
 
-  def shift(x: Int) = IdRange(start+x, end+x)
-  def size = end - start
-  def isEmpty = end == start
+  def shift(x: Int) = IdRange(start + x, end + x)
+  def size          = end - start
+  def isEmpty       = end == start
 
   def range = start until end
 }
 
-object IdRange
-{
-  def overlaps(s: Seq[IdRange]) = if (s.isEmpty) None else {
-    val ranges = s.sorted
-    (ranges.tail zip ranges.init) find { case (a, b) => a overlaps b }
-  }
+object IdRange {
+  def overlaps(s: Seq[IdRange]) =
+    if (s.isEmpty) None
+    else {
+      val ranges = s.sorted
+      (ranges.tail zip ranges.init) find { case (a, b) => a overlaps b }
+    }
 }
 
 // An potentially empty inclusive range of 2-powers [min, max] (in bytes)
-case class TransferSizes(min: Int, max: Int)
-{
+case class TransferSizes(min: Int, max: Int) {
   def this(x: Int) = this(x, x)
 
-  require (min <= max, s"Min transfer $min > max transfer $max")
-  require (min >= 0 && max >= 0, s"TransferSizes must be positive, got: ($min, $max)")
-  require (max == 0 || isPow2(max), s"TransferSizes must be a power of 2, got: $max")
-  require (min == 0 || isPow2(min), s"TransferSizes must be a power of 2, got: $min")
-  require (max == 0 || min != 0, s"TransferSize 0 is forbidden unless (0,0), got: ($min, $max)")
+  require(min <= max, s"Min transfer $min > max transfer $max")
+  require(min >= 0 && max >= 0, s"TransferSizes must be positive, got: ($min, $max)")
+  require(max == 0 || isPow2(max), s"TransferSizes must be a power of 2, got: $max")
+  require(min == 0 || isPow2(min), s"TransferSizes must be a power of 2, got: $min")
+  require(max == 0 || min != 0, s"TransferSize 0 is forbidden unless (0,0), got: ($min, $max)")
 
-  def none = min == 0
-  def contains(x: Int) = isPow2(x) && min <= x && x <= max
+  def none               = min == 0
+  def contains(x: Int)   = isPow2(x) && min <= x && x <= max
   def containsLg(x: Int) = contains(1 << x)
   def containsLg(x: UInt) =
     if (none) Bool(false)
@@ -97,9 +97,9 @@ case class TransferSizes(min: Int, max: Int)
   def intersect(x: TransferSizes) =
     if (x.max < min || max < x.min) TransferSizes.none
     else TransferSizes(scala.math.max(min, x.min), scala.math.min(max, x.max))
-  
+
   // Not a union, because the result may contain sizes contained by neither term
-  def cover(x: TransferSizes) = {
+  def cover(x: TransferSizes) =
     if (none) {
       x
     } else if (x.none) {
@@ -107,16 +107,15 @@ case class TransferSizes(min: Int, max: Int)
     } else {
       TransferSizes(scala.math.min(min, x.min), scala.math.max(max, x.max))
     }
-  }
 
   override def toString() = "TransferSizes[%d, %d]".format(min, max)
 }
 
 object TransferSizes {
   def apply(x: Int) = new TransferSizes(x)
-  val none = new TransferSizes(0)
+  val none          = new TransferSizes(0)
 
-  def cover(seq: Seq[TransferSizes]) = seq.foldLeft(none)(_ cover _)
+  def cover(seq: Seq[TransferSizes])     = seq.foldLeft(none)(_ cover _)
   def intersect(seq: Seq[TransferSizes]) = seq.reduce(_ intersect _)
 
   implicit def asBool(x: TransferSizes) = !x.none
@@ -126,15 +125,17 @@ object TransferSizes {
 // Base is the base address, and mask are the bits consumed by the manager
 // e.g: base=0x200, mask=0xff describes a device managing 0x200-0x2ff
 // e.g: base=0x1000, mask=0xf0f decribes a device managing 0x1000-0x100f, 0x1100-0x110f, ...
-case class AddressSet(base: BigInt, mask: BigInt) extends Ordered[AddressSet]
-{
+case class AddressSet(base: BigInt, mask: BigInt) extends Ordered[AddressSet] {
   // Forbid misaligned base address (and empty sets)
-  require ((base & mask) == 0, s"Mis-aligned AddressSets are forbidden, got: ${this.toString}")
-  require (base >= 0, s"AddressSet negative base is ambiguous: $base") // TL2 address widths are not fixed => negative is ambiguous
+  require((base & mask) == 0, s"Mis-aligned AddressSets are forbidden, got: ${this.toString}")
+  require(
+    base >= 0,
+    s"AddressSet negative base is ambiguous: $base"
+  ) // TL2 address widths are not fixed => negative is ambiguous
   // We do allow negative mask (=> ignore all high bits)
 
   def contains(x: BigInt) = ((x ^ base) & ~mask) == 0
-  def contains(x: UInt) = ((x ^ UInt(base)).zext() & SInt(~mask)) === SInt(0)
+  def contains(x: UInt)   = ((x ^ UInt(base)).zext() & SInt(~mask)) === SInt(0)
 
   // turn x into an address contained in this set
   def legalize(x: UInt): UInt = base.U | (mask.U & x)
@@ -147,16 +148,16 @@ case class AddressSet(base: BigInt, mask: BigInt) extends Ordered[AddressSet]
   // The number of bytes to which the manager must be aligned
   def alignment = ((mask + 1) & ~mask)
   // Is this a contiguous memory range
-  def contiguous = alignment == mask+1
+  def contiguous = alignment == mask + 1
 
   def finite = mask >= 0
-  def max = { require (finite, "Max cannot be calculated on infinite mask"); base | mask }
+  def max    = { require(finite, "Max cannot be calculated on infinite mask"); base | mask }
 
   // Widen the match function to ignore all bits in imask
   def widen(imask: BigInt) = AddressSet(base & ~imask, mask | imask)
 
   // Return an AddressSet that only contains the addresses both sets contain
-  def intersect(x: AddressSet): Option[AddressSet] = {
+  def intersect(x: AddressSet): Option[AddressSet] =
     if (!overlaps(x)) {
       None
     } else {
@@ -164,9 +165,8 @@ case class AddressSet(base: BigInt, mask: BigInt) extends Ordered[AddressSet]
       val r_base = base | x.base
       Some(AddressSet(r_base, r_mask))
     }
-  }
 
-  def subtract(x: AddressSet): Seq[AddressSet] = {
+  def subtract(x: AddressSet): Seq[AddressSet] =
     if (!overlaps(x)) {
       Seq(this)
     } else {
@@ -175,7 +175,6 @@ case class AddressSet(base: BigInt, mask: BigInt) extends Ordered[AddressSet]
       val fracture = AddressSet.enumerateMask(new_inflex).flatMap(m => intersect(AddressSet(m, ~new_inflex)))
       fracture.filter(!_.overlaps(x))
     }
-  }
 
   // AddressSets have one natural Ordering (the containment order, if contiguous)
   def compare(x: AddressSet) = {
@@ -185,19 +184,18 @@ case class AddressSet(base: BigInt, mask: BigInt) extends Ordered[AddressSet]
   }
 
   // We always want to see things in hex
-  override def toString() = {
+  override def toString() =
     if (mask >= 0) {
       "AddressSet(0x%x, 0x%x)".format(base, mask)
     } else {
       "AddressSet(0x%x, ~0x%x)".format(base, ~mask)
     }
-  }
 
   def toRanges = {
-    require (finite, "Ranges cannot be calculated on infinite mask")
-    val size = alignment
-    val fragments = mask & ~(size-1)
-    val bits = bitIndexes(fragments)
+    require(finite, "Ranges cannot be calculated on infinite mask")
+    val size      = alignment
+    val fragments = mask & ~(size - 1)
+    val bits      = bitIndexes(fragments)
     (BigInt(0) until (BigInt(1) << bits.size)).map { i =>
       val off = bitIndexes(i).foldLeft(base) { case (a, b) => a.setBit(bits(b)) }
       AddressRange(off, size)
@@ -205,36 +203,40 @@ case class AddressSet(base: BigInt, mask: BigInt) extends Ordered[AddressSet]
   }
 }
 
-object AddressSet
-{
+object AddressSet {
   val everything = AddressSet(0, -1)
-  def misaligned(base: BigInt, size: BigInt, tail: Seq[AddressSet] = Seq()): Seq[AddressSet] = {
-    if (size == 0) tail.reverse else {
-      val maxBaseAlignment = base & (-base) // 0 for infinite (LSB)
+  def misaligned(base: BigInt, size: BigInt, tail: Seq[AddressSet] = Seq()): Seq[AddressSet] =
+    if (size == 0) tail.reverse
+    else {
+      val maxBaseAlignment = base & (-base)               // 0 for infinite (LSB)
       val maxSizeAlignment = BigInt(1) << log2Floor(size) // MSB of size
       val step =
         if (maxBaseAlignment == 0 || maxBaseAlignment > maxSizeAlignment)
-        maxSizeAlignment else maxBaseAlignment
-      misaligned(base+step, size-step, AddressSet(base, step-1) +: tail)
+          maxSizeAlignment
+        else maxBaseAlignment
+      misaligned(base + step, size - step, AddressSet(base, step - 1) +: tail)
     }
-  }
 
   def unify(seq: Seq[AddressSet]): Seq[AddressSet] = {
-    val n = seq.size
-    val array = Array(seq:_*)
-    var filter = Array.fill(n) { false }
-    for (i <- 0 until n-1) { if (!filter(i)) {
-      for (j <- i+1 until n) { if (!filter(j)) {
-        val a = array(i)
-        val b = array(j)
-        if (a.mask == b.mask && isPow2(a.base ^ b.base)) {
-          val c_base = a.base & ~(a.base ^ b.base)
-          val c_mask = a.mask | (a.base ^ b.base)
-          filter.update(j, true)
-          array.update(i, AddressSet(c_base, c_mask))
+    val n      = seq.size
+    val array  = Array(seq: _*)
+    var filter = Array.fill(n)(false)
+    for (i <- 0 until n - 1) {
+      if (!filter(i)) {
+        for (j <- i + 1 until n) {
+          if (!filter(j)) {
+            val a = array(i)
+            val b = array(j)
+            if (a.mask == b.mask && isPow2(a.base ^ b.base)) {
+              val c_base = a.base & ~(a.base ^ b.base)
+              val c_mask = a.mask | (a.base ^ b.base)
+              filter.update(j, true)
+              array.update(i, AddressSet(c_base, c_mask))
+            }
+          }
         }
-      }}
-    }}
+      }
+    }
     val out = (array zip filter) flatMap { case (a, f) => if (f) None else Some(a) }
     if (out.size != n) unify(out) else out.toList
   }
@@ -246,35 +248,34 @@ object AddressSet
   }
 
   def enumerateBits(mask: BigInt): Seq[BigInt] = {
-    def helper(x: BigInt): Seq[BigInt] = {
+    def helper(x: BigInt): Seq[BigInt] =
       if (x == 0) {
         Nil
       } else {
         val bit = x & (-x)
         bit +: helper(x & ~bit)
       }
-    }
     helper(mask)
   }
 }
 
-case class BufferParams(depth: Int, flow: Boolean, pipe: Boolean)
-{
-  require (depth >= 0, "Buffer depth must be >= 0")
+case class BufferParams(depth: Int, flow: Boolean, pipe: Boolean) {
+  require(depth >= 0, "Buffer depth must be >= 0")
   def isDefined = depth > 0
-  def latency = if (isDefined && !flow) 1 else 0
+  def latency   = if (isDefined && !flow) 1 else 0
 
   def apply[T <: Data](x: DecoupledIO[T]) =
-    if (isDefined) Queue(x, depth, flow=flow, pipe=pipe)
+    if (isDefined) Queue(x, depth, flow = flow, pipe = pipe)
     else x
 
   def irrevocable[T <: Data](x: ReadyValidIO[T]) =
-    if (isDefined) Queue.irrevocable(x, depth, flow=flow, pipe=pipe)
+    if (isDefined) Queue.irrevocable(x, depth, flow = flow, pipe = pipe)
     else x
 
   def sq[T <: Data](x: DecoupledIO[T]) =
-    if (!isDefined) x else {
-      val sq = Module(new ShiftQueue(x.bits, depth, flow=flow, pipe=pipe))
+    if (!isDefined) x
+    else {
+      val sq = Module(new ShiftQueue(x.bits, depth, flow = flow, pipe = pipe))
       sq.io.enq <> x
       sq.io.deq
     }
@@ -283,8 +284,7 @@ case class BufferParams(depth: Int, flow: Boolean, pipe: Boolean)
 
 }
 
-object BufferParams
-{
+object BufferParams {
   implicit def apply(depth: Int): BufferParams = BufferParams(depth, false, false)
 
   val default = BufferParams(2)
@@ -293,31 +293,33 @@ object BufferParams
   val pipe    = BufferParams(1, false, true)
 }
 
-case class TriStateValue(value: Boolean, set: Boolean)
-{
+case class TriStateValue(value: Boolean, set: Boolean) {
   def update(orig: Boolean) = if (set) value else orig
 }
 
-object TriStateValue
-{
+object TriStateValue {
   implicit def apply(value: Boolean): TriStateValue = TriStateValue(value, true)
-  def unset = TriStateValue(false, false)
+  def unset                                         = TriStateValue(false, false)
 }
 
 /** Enumerates the types of clock crossings generally supported by Diplomatic bus protocols  */
-sealed trait ClockCrossingType
-{
+sealed trait ClockCrossingType {
   def sameClock = this match {
     case _: SynchronousCrossing => true
-    case _ => false
+    case _                      => false
   }
 }
 
 case object NoCrossing // converts to SynchronousCrossing(BufferParams.none) via implicit def in package
 case class SynchronousCrossing(params: BufferParams = BufferParams.default) extends ClockCrossingType
-case class RationalCrossing(direction: RationalDirection = FastToSlow) extends ClockCrossingType
-case class AsynchronousCrossing(depth: Int = 8, sourceSync: Int = 3, sinkSync: Int = 3, safe: Boolean = true, narrow: Boolean = false) extends ClockCrossingType
-{
+case class RationalCrossing(direction: RationalDirection = FastToSlow)      extends ClockCrossingType
+case class AsynchronousCrossing(
+  depth: Int = 8,
+  sourceSync: Int = 3,
+  sinkSync: Int = 3,
+  safe: Boolean = true,
+  narrow: Boolean = false
+) extends ClockCrossingType {
   def asSinkParams = AsyncQueueParams(depth, sinkSync, safe, narrow)
 }
 

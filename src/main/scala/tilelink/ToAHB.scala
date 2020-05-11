@@ -1,15 +1,16 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.tilelink
+
 import scala.math.{ max, min }
 
 import Chisel._
 import freechips.rocketchip.amba._
+import freechips.rocketchip.amba.ahb.AHBParameters._
 import freechips.rocketchip.amba.ahb._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.util._
-import freechips.rocketchip.amba.ahb.AHBParameters._
 
 case class TLToAHBNode(supportHints: Boolean)(implicit valName: ValName)
     extends MixedAdapterNode(TLImp, AHBImpMaster)(dFn = { cp =>

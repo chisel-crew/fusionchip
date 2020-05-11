@@ -1,6 +1,7 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.devices.debug
+
 import chisel3._
 import chisel3.experimental._
 import freechips.rocketchip.amba.apb.{ APBRegisterNode }

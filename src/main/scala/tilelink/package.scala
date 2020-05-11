@@ -1,7 +1,6 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip
-
 import Chisel._
 import freechips.rocketchip.diplomacy._
 

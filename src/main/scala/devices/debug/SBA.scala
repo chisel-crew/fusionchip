@@ -27,14 +27,12 @@ object SBErrorCode extends scala.Enumeration {
   val BadAccess  = Value(4)
   val OtherError = Value(7)
 }
-
 import SBErrorCode._
 
 object SystemBusAccessModule {
   def apply(sb2tl: SBToTL, dmactive: Bool, dmAuthenticated: Bool)(
     implicit p: Parameters
-  ): (Seq[RegField], Seq[Seq[RegField]], Seq[Seq[RegField]]) = {
-    import DMI_RegAddrs._
+  ): (Seq[RegField], Seq[Seq[RegField]], Seq[Seq[RegField]]) = {import DMI_RegAddrs._
     import SBErrorCode._
 
     val cfg = p(DebugModuleKey).get

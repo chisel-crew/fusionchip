@@ -1,9 +1,8 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.diplomaticobjectmodel.model
-import scala.collection.mutable
 
-trait OMCustomExtensionSpecification{
+trait OMCustomExtensionSpecification {
   def name: String
   def version: String
   def _types: Seq[String] = Seq("OMCustomExtensionSpecification", "OMSpecification")

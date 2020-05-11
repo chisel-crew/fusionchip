@@ -1,6 +1,5 @@
 // See LICENSE.SiFive for license details.
 package freechips.rocketchip.prci
-
 import scala.math.max
 
 import chisel3._

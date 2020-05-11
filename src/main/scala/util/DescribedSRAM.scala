@@ -2,7 +2,6 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.util
-
 import scala.math.log10
 
 import chisel3.internal.InstanceId

@@ -1,7 +1,6 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.subsystem
-
 import scala.language.dynamics
 
 import freechips.rocketchip.config.Parameters

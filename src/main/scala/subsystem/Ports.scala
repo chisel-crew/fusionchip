@@ -1,7 +1,6 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.subsystem
-
 import Chisel._
 import freechips.rocketchip.amba.axi4._
 import freechips.rocketchip.config.{ Field, Parameters }

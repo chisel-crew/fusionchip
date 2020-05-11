@@ -69,18 +69,21 @@ object DebugModuleAccessType extends scala.Enumeration {
   type DebugModuleAccessType = Value
   val Access8Bit, Access16Bit, Access32Bit, Access64Bit, Access128Bit = Value
 }
+
 import DebugModuleAccessType._
 
 object DebugAbstractCommandError extends scala.Enumeration {
   type DebugAbstractCommandError = Value
   val Success, ErrBusy, ErrNotSupported, ErrException, ErrHaltResume = Value
 }
+
 import DebugAbstractCommandError._
 
 object DebugAbstractCommandType extends scala.Enumeration {
   type DebugAbstractCommandType = Value
   val AccessRegister, QuickAccess = Value
 }
+
 import DebugAbstractCommandType._
 
 /** Parameters exposed to the top-level design, set based on
@@ -824,7 +827,6 @@ class TLDebugModuleInner(device: Device, getNComponents: () => Int, beatBytes: I
     //--------------------------------------------------------------
     // Import constants for shorter variable names
     //--------------------------------------------------------------
-
     import DMIConsts._
     import DMI_RegAddrs._
     import DsbBusConsts._
@@ -1464,13 +1466,15 @@ class TLDebugModuleInner(device: Device, getNComponents: () => Int, beatBytes: I
     )
 
     val (sbcsFields, sbAddrFields, sbDataFields): (Seq[RegField], Seq[Seq[RegField]], Seq[Seq[RegField]]) =
-      sb2tlOpt.map(sb2tl => SystemBusAccessModule(sb2tl, io.dmactive, dmAuthenticated)(p)).getOrElse(
-        (
-          Seq.empty[RegField],
-          Seq.fill[Seq[RegField]](4)(Seq.empty[RegField]),
-          Seq.fill[Seq[RegField]](4)(Seq.empty[RegField])
+      sb2tlOpt
+        .map(sb2tl => SystemBusAccessModule(sb2tl, io.dmactive, dmAuthenticated)(p))
+        .getOrElse(
+          (
+            Seq.empty[RegField],
+            Seq.fill[Seq[RegField]](4)(Seq.empty[RegField]),
+            Seq.fill[Seq[RegField]](4)(Seq.empty[RegField])
+          )
         )
-      )
 
     //--------------------------------------------------------------
     // Program Buffer Access (DMI ... System Bus can override)

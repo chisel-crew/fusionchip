@@ -1,7 +1,6 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.system
-
 import Chisel._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.devices.tilelink._

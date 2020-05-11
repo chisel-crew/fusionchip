@@ -1,6 +1,7 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.amba.axi4
+
 import scala.math.{ max, min }
 
 import Chisel._
