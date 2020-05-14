@@ -1,5 +1,6 @@
 .bloop
 .metals
+.vscode
 target 
 macros/target
 project/target 

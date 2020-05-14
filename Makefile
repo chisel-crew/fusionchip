@@ -1,5 +1,6 @@
 show:	
 clean:
+	@rm -rf testbuild
 	@find . -name "target" | xargs rm -rf {} \;
 
 vs:

@@ -2,12 +2,12 @@ package fusion
 
 import java.nio.file.{ Files, Paths }
 
-import firrtl.options.TargetDirAnnotation
+import Chisel.Module
 import firrtl.AnnotationSeq
+import firrtl.options.TargetDirAnnotation
+import freechips.rocketchip.diplomacy.LazyModule
 import freechips.rocketchip.stage.{ ConfigsAnnotation, TopModuleAnnotation }
 import freechips.rocketchip.system.{ RocketChipStage }
-import freechips.rocketchip.diplomacy.LazyModule
-import Chisel.Module
 
 object Emit extends App {
 

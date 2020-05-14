@@ -60,7 +60,7 @@ lazy val root = (project in file("."))
 addCommandAlias("rel", "reload")
 addCommandAlias("com", "all compile test:compile it:compile")
 addCommandAlias("fix", "all compile:scalafix test:scalafix")
-//addCommandAlias("fmt", "all scalafmtSbt scalafmtAll")
-addCommandAlias("fmt", "all scalafmtSbt")
+addCommandAlias("fmt", "all scalafmtSbt scalafmtAll")
+//addCommandAlias("fmt", "all scalafmtSbt")
 
 scalafixDependencies in ThisBuild += "com.nequissimus" %% "sort-imports" % "0.5.0"

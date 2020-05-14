@@ -2,18 +2,17 @@
 package fusion
 
 import freechips.rocketchip.config._
-import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.diplomacy.{ DTSTimebase}
+import freechips.rocketchip.subsystem._
 import freechips.rocketchip.system._
-
-import sifive.blocks.devices.mockaon._
 import sifive.blocks.devices.gpio._
+import sifive.blocks.devices.i2c._
+import sifive.blocks.devices.mockaon._
 import sifive.blocks.devices.pwm._
 import sifive.blocks.devices.spi._
 import sifive.blocks.devices.uart._
-import sifive.blocks.devices.i2c._
 
 // Default FreedomEConfig
 class DefaultFreedomEConfig extends Config (
