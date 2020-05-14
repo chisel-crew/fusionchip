@@ -1,3 +1,0 @@
-[submodule "sifive-blocks"]
-	path = sifive-blocks
-	url = git@github.com:sifive/sifive-blocks.git
