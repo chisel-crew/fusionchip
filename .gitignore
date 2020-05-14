@@ -6,3 +6,5 @@ project/target
 project/project
 project/.bloop
 project/metals.sbt
+testbuild
+Makefile

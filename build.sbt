@@ -12,7 +12,9 @@ lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
     "-Xsource:2.11",
     "-language:reflectiveCalls",
-    "-language:postfixOps"
+    "-language:postfixOps",
+    "-unchecked",
+    "-deprecation"
   )
 )
 
