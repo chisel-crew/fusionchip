@@ -2,11 +2,16 @@
 
 package freechips.rocketchip.system
 
-import chisel3.stage.{ChiselCli, ChiselStage}
+import chisel3.stage.{ ChiselCli, ChiselStage }
 import firrtl.options.PhaseManager.PhaseDependency
-import firrtl.options.{Dependency, Phase, PreservesAll, Shell, StageMain}
+import firrtl.options.{ Dependency, Phase, PreservesAll, Shell, StageMain }
 import firrtl.stage.FirrtlCli
 import freechips.rocketchip.stage.RocketChipCli
+import chisel3.RawModule
+import firrtl.AnnotationSeq
+import chisel3.stage.ChiselGeneratorAnnotation
+import firrtl.annotations.DeletedAnnotation
+import firrtl.EmittedVerilogCircuitAnnotation
 
 class RocketChipStage extends ChiselStage with PreservesAll[Phase] {
 
@@ -21,13 +26,23 @@ class RocketChipStage extends ChiselStage with PreservesAll[Phase] {
     Dependency[chisel3.stage.phases.AddImplicitOutputFile],
     Dependency[chisel3.stage.phases.AddImplicitOutputAnnotationFile],
     Dependency[chisel3.stage.phases.MaybeAspectPhase],
+    Dependency[chisel3.stage.phases.MaybeFirrtlStage],
     Dependency[chisel3.stage.phases.Emitter],
     Dependency[chisel3.stage.phases.Convert],
     Dependency[freechips.rocketchip.stage.phases.GenerateFirrtlAnnos],
     Dependency[freechips.rocketchip.stage.phases.AddDefaultTests],
     Dependency[freechips.rocketchip.stage.phases.GenerateTestSuiteMakefrags],
-    Dependency[freechips.rocketchip.stage.phases.GenerateArtefacts],
+    Dependency[freechips.rocketchip.stage.phases.GenerateArtefacts]
   )
+
+  def emitVlog(
+    gen: => RawModule,
+    args: Array[String] = Array.empty,
+    annotations: AnnotationSeq = Seq.empty
+  ): String =
+    execute(Array("-X", "verilog") ++ args, ChiselGeneratorAnnotation(() => gen) +: annotations).collectFirst {
+      case DeletedAnnotation(_, EmittedVerilogCircuitAnnotation(a)) => a
+    }.get.value
 
   // TODO: need a RunPhaseAnnotation to inject phases into ChiselStage
 }

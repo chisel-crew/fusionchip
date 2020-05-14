@@ -11,51 +11,67 @@ import Chisel.Module
 
 object Emit extends App {
 
-  val dest = System.getProperty("user.dir") + "/testbuild"
-  val path = Paths.get(dest)
+  private val dest = System.getProperty("user.dir") + "/testbuild"
+  private val path = Paths.get(dest)
   if (!Files.exists(path))
     Files.createDirectory(path)
-
-  val entity = "vlog" // {"soc", "core"}
 
   private def runAnnotations(cfg: String, top: String) = Seq(
     new TargetDirAnnotation(dest),
     new TopModuleAnnotation(Class.forName(top)),
     new ConfigsAnnotation(Seq(cfg))
   )
+  private lazy val cfg  = new FusionConfig()
+  private lazy val ldut = LazyModule(new FusionSystem()(cfg))
+  private lazy val dut  = Module(ldut.module)
 
   def emitEntity(item: String) = item match {
     case "soc" =>
-      new RocketChipStage().run(runAnnotations("fusion.FusionConfig", "fusion.FusionSystem"))
+      println("Running soc")
+
+      val stage = new RocketChipStage()
+      // .run(runAnnotations("fusion.FusionConfig", "fusion.FusionSystem"))
+      // // .andThen(chisel3.stage.ChiselGeneratorAnnotation(() => dut))
+      // // .andThen(EEE.emit(Seq(chisel3.stage.ChiselGeneratorAnnotation(() => dut))))
+      // .run(EEE.emit(Seq(chisel3.stage.ChiselGeneratorAnnotation(() => dut))))
+      stage.run(
+        Seq(
+          new TargetDirAnnotation(dest),
+          new TopModuleAnnotation(Class.forName("fusion.FusionSystem")),
+          new ConfigsAnnotation(Seq("fusion.FusionConfig"))
+          // EEE.emit(Seq(chisel3.stage.ChiselGeneratorAnnotation(() => dut)))
+          // ).andThen(EEE.emit(Seq(chisel3.stage.ChiselGeneratorAnnotation(() => dut))))
+        )
+      )
+    // stage.emitVlog(chisel3.stage.ChiselGeneratorAnnotation(() => dut))
+    // stage.emitVlog(dut)
 
     case "core" =>
+      println("Running Core")
+
       new RocketChipStage()
         .run(runAnnotations("freechips.rocketchip.system.DefaultConfig", "freechips.rocketchip.system.TestHarness"))
 
     case "vlog" =>
       println("Running vlog")
       val stage = new RocketChipStage()
-      val cfg   = new FusionConfig()
-      val ldut  = LazyModule(new FusionSystem()(cfg))
-      val dut   = Module(ldut.module)
 
-      println(">>>>>>>>>>")
       stage.emitVerilog(
         dut,
         Array.empty[String],
         // Seq.empty[AnnotationSeq],
-        stage.run(runAnnotations("fusion.FusionConfig", "fusion.FusionSystem"))
-        // EEE.emit("/testbuild", Seq(chisel3.stage.ChiselGeneratorAnnotation(() => dut)))
+        // stage.run(runAnnotations("fusion.FusionConfig", "fusion.FusionSystem"))
+        EEE.emit(Seq(chisel3.stage.ChiselGeneratorAnnotation(() => dut)))
       )
 
     case _ => new RuntimeException("Invalid entity provided")
   }
 
-  emitEntity("vlog")
+  emitEntity("soc")
 }
 
 object EEE {
   private lazy val stage = new chisel3.stage.ChiselStage
 
-  def emit(path: String, ann: AnnotationSeq) = stage.execute((Array("-td", path, "-X", "verilog")), ann)
+  def emit(ann: AnnotationSeq) = stage.execute((Array("-X", "verilog")), ann)
 }
