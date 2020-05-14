@@ -5,15 +5,17 @@ import java.nio.file.{ Files, Paths }
 import firrtl.options.TargetDirAnnotation
 import freechips.rocketchip.stage.{ ConfigsAnnotation, TopModuleAnnotation }
 import freechips.rocketchip.system.{ RocketChipStage }
+import freechips.rocketchip.diplomacy.LazyModule
+import Chisel.Module
 
-object EmitSoC extends App {
+object Emit extends App {
 
   val dest = System.getProperty("user.dir") + "/testbuild"
   val path = Paths.get(dest)
   if (!Files.exists(path))
     Files.createDirectory(path)
 
-  val entity = "soc" // {"soc", "core"}
+  val entity = "vlog" // {"soc", "core"}
 
   def emitEntity(item: String) = item match {
     case "soc" =>
@@ -30,6 +32,21 @@ object EmitSoC extends App {
           new TargetDirAnnotation(dest),
           new TopModuleAnnotation(Class.forName("freechips.rocketchip.system.TestHarness")),
           new ConfigsAnnotation(Seq("freechips.rocketchip.system.DefaultConfig"))
+        )
+      )
+
+    case "vlog" =>
+      val st   = new RocketChipStage()
+      val cfg  = new FusionConfig()
+      val ldut = LazyModule(new FusionSystem()(cfg))
+      val dut  = Module(ldut.module)
+      st.emitVerilog(
+        dut,
+        Array.empty[String],
+        Seq(
+          new TargetDirAnnotation(dest),
+          new TopModuleAnnotation(Class.forName("fusion.FusionSystem")),
+          new ConfigsAnnotation(Seq("fusion.FusionConfig"))
         )
       )
 

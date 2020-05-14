@@ -27,7 +27,7 @@ class DefaultFreedomEConfig extends Config (
 )
 
 // Freedom E300 Arty Dev Kit Peripherals
-class E300DevKitPeripherals extends Config((site, here, up) => {
+class E300DevKitPeripherals extends Config((_,_,_) => {
   case PeripheryGPIOKey => List(
     GPIOParams(address = 0x10012000, width = 32, includeIOF = true))
   case PeripheryPWMKey => List(
@@ -56,7 +56,7 @@ class E300DevKitPeripherals extends Config((site, here, up) => {
 // Freedom E300 Arty Dev Kit Peripherals
 class FusionConfig extends Config(
   new E300DevKitPeripherals    ++
-  new DefaultFreedomEConfig().alter((site,here,up) => {
+  new DefaultFreedomEConfig().alter((site,_,up) => {
     case DTSTimebase => BigInt(32768)
     case JtagDTMKey => new JtagDTMConfig (
       idcodeVersion = 2,
