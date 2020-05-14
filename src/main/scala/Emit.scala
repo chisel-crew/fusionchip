@@ -8,6 +8,7 @@ import freechips.rocketchip.stage.{ ConfigsAnnotation, TopModuleAnnotation }
 import freechips.rocketchip.system.{ RocketChipStage }
 import freechips.rocketchip.diplomacy.LazyModule
 import Chisel.Module
+import chisel3.stage.ChiselStage
 
 object Emit extends App {
 
@@ -21,15 +22,19 @@ object Emit extends App {
     new TopModuleAnnotation(Class.forName(top)),
     new ConfigsAnnotation(Seq(cfg))
   )
-  private lazy val cfg  = new FusionConfig()
+  private val cfg = new FusionConfig()
+
   private lazy val ldut = LazyModule(new FusionSystem()(cfg))
   private lazy val dut  = Module(ldut.module)
+
+  val mod = new FusionSystem()(cfg)
 
   def emitEntity(item: String) = item match {
     case "soc" =>
       println("Running soc")
 
-      val stage = new RocketChipStage()
+      // val stage = new RocketChipStage()
+      val stage = new ChiselStage()
       // .run(runAnnotations("fusion.FusionConfig", "fusion.FusionSystem"))
       // // .andThen(chisel3.stage.ChiselGeneratorAnnotation(() => dut))
       // // .andThen(EEE.emit(Seq(chisel3.stage.ChiselGeneratorAnnotation(() => dut))))
@@ -54,20 +59,24 @@ object Emit extends App {
 
     case "vlog" =>
       println("Running vlog")
-      val stage = new RocketChipStage()
+      // val stage = new RocketChipStage()
+      val stage = new ChiselStage()
+
+      // val anno = chisel3.stage.ChiselGeneratorAnnotation(() => new FusionSystem()(cfg))
+      // val anno = chisel3.stage.ChiselGeneratorAnnotation(() => mod.module)
 
       stage.emitVerilog(
-        dut,
+        mod.module,
         Array.empty[String],
-        // Seq.empty[AnnotationSeq],
-        // stage.run(runAnnotations("fusion.FusionConfig", "fusion.FusionSystem"))
-        EEE.emit(Seq(chisel3.stage.ChiselGeneratorAnnotation(() => dut)))
+        // // Seq.empty[AnnotationSeq],
+        stage.run(runAnnotations("fusion.FusionConfig", "fusion.FusionSystem"))
+        // EEE.emit(Seq(chisel3.stage.ChiselGeneratorAnnotation(() => dut)))
       )
 
     case _ => new RuntimeException("Invalid entity provided")
   }
 
-  emitEntity("soc")
+  emitEntity("vlog")
 }
 
 object EEE {
