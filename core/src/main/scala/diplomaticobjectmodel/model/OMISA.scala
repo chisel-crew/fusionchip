@@ -2,31 +2,34 @@
 
 package freechips.rocketchip.diplomaticobjectmodel.model
 
+
 import freechips.rocketchip.rocket.RocketCoreParams
-import freechips.rocketchip.tile.{ CoreParams, RocketTile }
+import freechips.rocketchip.tile.{CoreParams, RocketTile}
 import freechips.rocketchip.util.BooleanToAugmentedBoolean
 
 trait OMExtensionType extends OMEnum
-case object M         extends OMExtensionType
-case object A         extends OMExtensionType
-case object F         extends OMExtensionType
-case object D         extends OMExtensionType
-case object C         extends OMExtensionType
-case object U         extends OMExtensionType
-case object S         extends OMExtensionType
+case object M extends OMExtensionType
+case object A extends OMExtensionType
+case object F extends OMExtensionType
+case object D extends OMExtensionType
+case object C extends OMExtensionType
+case object U extends OMExtensionType
+case object S extends OMExtensionType
 
 trait OMAddressTranslationMode extends OMEnum
-case object Bare               extends OMAddressTranslationMode
-case object Sv32               extends OMAddressTranslationMode
-case object Sv39               extends OMAddressTranslationMode
-case object Sv48               extends OMAddressTranslationMode
+case object Bare extends OMAddressTranslationMode
+case object Sv32 extends OMAddressTranslationMode
+case object Sv39 extends OMAddressTranslationMode
+case object Sv48 extends OMAddressTranslationMode
+// unratified/subject-to-change in the RISC-V priviledged ISA specification:
+case object Sv57 extends OMAddressTranslationMode
 
 trait OMBaseInstructionSet extends OMEnum
-case object RV32E          extends OMBaseInstructionSet
-case object RV32I          extends OMBaseInstructionSet
-case object RV64E          extends OMBaseInstructionSet
-case object RV64I          extends OMBaseInstructionSet
-case object RV128I         extends OMBaseInstructionSet
+case object RV32E extends OMBaseInstructionSet
+case object RV32I extends OMBaseInstructionSet
+case object RV64E extends OMBaseInstructionSet
+case object RV64I extends OMBaseInstructionSet
+case object RV128I extends OMBaseInstructionSet
 
 case class OMISA(
   xLen: Int,
@@ -61,11 +64,11 @@ object OMISA {
     val baseInstructionSet = xLen match {
       case 32 => if (coreParams.useRVE) RV32E else RV32I
       case 64 => if (coreParams.useRVE) RV64E else RV64I
-      case _  => throw new IllegalArgumentException(s"ERROR: Invalid Xlen: $xLen")
+      case _ => throw new IllegalArgumentException(s"ERROR: Invalid Xlen: $xLen")
     }
 
     val customExtensions = {
-      if (coreParams.haveCFlush) List(Xsifivecflushdlone(full = true, line = tile.dcache.canSupportCFlushLine)) else Nil
+      if (coreParams.haveCFlush) List (Xsifivecflushdlone(full = true, line = tile.dcache.canSupportCFlushLine)) else Nil
     }
 
     val isaExtSpec = ISAExtensions.specVersion _
@@ -77,15 +80,16 @@ object OMISA {
       case RV32I => "2.0"
       case RV64E => "1.9"
       case RV64I => "2.0"
-      case _     => throw new IllegalArgumentException(s"ERROR: Invalid baseISAVersion: $baseInstructionSet")
+      case _ => throw new IllegalArgumentException(s"ERROR: Invalid baseISAVersion: $baseInstructionSet")
     }
 
     val addressTranslationModes = xLen match {
       case _ if !coreParams.useVM => Bare
-      case 32 if (pgLevels == 2)  => Sv32
-      case 64 if (pgLevels == 3)  => Sv39
-      case 64 if (pgLevels == 4)  => Sv48
-      case _                      => throw new IllegalArgumentException(s"ERROR: Invalid Xlen/PgLevels combination: $xLen/$pgLevels")
+      case 32 if (pgLevels == 2) => Sv32
+      case 64 if (pgLevels == 3) => Sv39
+      case 64 if (pgLevels == 4) => Sv48
+      case 64 if (pgLevels == 5) => Sv57
+      case _ => throw new IllegalArgumentException(s"ERROR: Invalid Xlen/PgLevels combination: $xLen/$pgLevels")
     }
 
     OMISA(

@@ -3,14 +3,14 @@
 
 package freechips.rocketchip.rocket
 
-import ALU._
-import Chisel.ImplicitConversions._
 import Chisel._
-import Instructions._
+import Chisel.ImplicitConversions._
 import freechips.rocketchip.config.Parameters
-import freechips.rocketchip.scie.SCIE
 import freechips.rocketchip.tile.HasCoreParameters
 import freechips.rocketchip.util._
+import freechips.rocketchip.scie.SCIE
+import Instructions._
+import ALU._
 
 abstract trait DecodeConstants extends HasCoreParameters
 {

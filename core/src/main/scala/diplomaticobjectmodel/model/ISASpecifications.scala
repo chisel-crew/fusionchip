@@ -1,21 +1,21 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.diplomaticobjectmodel.model
-import freechips.rocketchip.tile.CoreParams
+
 import freechips.rocketchip.util.BooleanToAugmentedBoolean
+import freechips.rocketchip.tile.CoreParams
 
 sealed trait PrivilegedArchitectureExtension extends OMEnum
-case object MachineLevelISA                  extends PrivilegedArchitectureExtension
-case object SupervisorLevelISA               extends PrivilegedArchitectureExtension
+case object MachineLevelISA extends PrivilegedArchitectureExtension
+case object SupervisorLevelISA extends PrivilegedArchitectureExtension
 
 object PrivilegedArchitectureExtensions {
   val specifications = Map[PrivilegedArchitectureExtension, String](
-    MachineLevelISA    -> "Machine-Level ISA",
+    MachineLevelISA -> "Machine-Level ISA",
     SupervisorLevelISA -> "Supervisor-Level ISA"
   )
 
-  def specVersion(extension: PrivilegedArchitectureExtension, version: String): OMSpecification =
-    OMSpecification(specifications(extension), version)
+  def specVersion(extension: PrivilegedArchitectureExtension, version: String): OMSpecification = OMSpecification(specifications(extension), version)
 }
 
 object BaseExtensions {
@@ -26,8 +26,7 @@ object BaseExtensions {
     RV64I -> "RV64I Base Integer Instruction Set"
   )
 
-  def specVersion(extension: OMBaseInstructionSet, version: String): OMSpecification =
-    OMSpecification(specifications(extension), version)
+  def specVersion(extension: OMBaseInstructionSet, version: String): OMSpecification = OMSpecification(specifications(extension), version)
 }
 
 object ISAExtensions {
@@ -41,6 +40,7 @@ object ISAExtensions {
     S -> "Supervisor-Level ISA"
   )
 
-  def specVersion(extension: OMExtensionType, version: String): OMSpecification =
-    OMSpecification(specifications(extension), version)
+  def specVersion(extension: OMExtensionType, version: String): OMSpecification = OMSpecification(specifications(extension), version)
 }
+
+

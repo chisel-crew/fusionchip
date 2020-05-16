@@ -8,8 +8,8 @@ import freechips.rocketchip.util.{AsyncResetRegVec, SimpleRegIO}
 
 object DescribedReg {
   import freechips.rocketchip.regmapper.RegFieldAccessType._
-  import freechips.rocketchip.regmapper.RegFieldRdAction._
   import freechips.rocketchip.regmapper.RegFieldWrType._
+  import freechips.rocketchip.regmapper.RegFieldRdAction._
 
   def apply[T <: Data](
     gen: => T,

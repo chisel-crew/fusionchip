@@ -4,8 +4,8 @@ package freechips.rocketchip.stage.phases
 
 import chisel3.stage.phases.Elaborate
 import firrtl.AnnotationSeq
-import firrtl.options.Viewer.view
 import firrtl.options.{Dependency, Phase, PreservesAll, StageOptions}
+import firrtl.options.Viewer.view
 import freechips.rocketchip.stage.RocketChipOptions
 import freechips.rocketchip.system.TestGeneration
 import freechips.rocketchip.util.HasRocketChipStageUtils

@@ -64,7 +64,7 @@ trait HasSyncExtInterrupts extends HasExtInterrupts { this: BaseSubsystem =>
 trait HasExtInterruptsBundle {
   val interrupts: UInt
 
-  def tieOffInterrupts(dummy: Int = 1): Unit = {
+  def tieOffInterrupts(dummy: Int = 1) {
     interrupts := UInt(0)
   }
 }

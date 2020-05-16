@@ -3,6 +3,7 @@
 package freechips.rocketchip.tile
 
 import Chisel._
+
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.interrupts._
@@ -59,7 +60,7 @@ trait SinksExternalInterrupts { this: BaseTile =>
   }
 
   // go from flat diplomatic Interrupts to bundled TileInterrupts
-  def decodeCoreInterrupts(core: TileInterrupts): Unit = {
+  def decodeCoreInterrupts(core: TileInterrupts) {
     val async_ips = Seq(core.debug)
     val periph_ips = Seq(
       core.msip,
@@ -79,19 +80,19 @@ trait SourcesExternalNotifications { this: BaseTile =>
   // Report unrecoverable error conditions
   val haltNode = IntSourceNode(IntSourcePortSimple())
 
-  def reportHalt(could_halt: Option[Bool]): Unit = {
+  def reportHalt(could_halt: Option[Bool]) {
     val (halt_and_catch_fire, _) = haltNode.out(0)
     halt_and_catch_fire(0) := could_halt.map(RegEnable(true.B, false.B, _)).getOrElse(false.B)
   }
 
-  def reportHalt(errors: Seq[CanHaveErrors]): Unit = {
+  def reportHalt(errors: Seq[CanHaveErrors]) {
     reportHalt(errors.flatMap(_.uncorrectable).map(_.valid).reduceOption(_||_))
   }
 
   // Report when the tile has ceased to retire instructions
   val ceaseNode = IntSourceNode(IntSourcePortSimple())
 
-  def reportCease(could_cease: Option[Bool], quiescenceCycles: Int = 8): Unit = {
+  def reportCease(could_cease: Option[Bool], quiescenceCycles: Int = 8) {
     def waitForQuiescence(cease: Bool): Bool = {
       // don't report cease until signal is stable for longer than any pipeline depth
       val count = RegInit(0.U(log2Ceil(quiescenceCycles + 1).W))
@@ -113,7 +114,7 @@ trait SourcesExternalNotifications { this: BaseTile =>
   // Report when the tile is waiting for an interrupt
   val wfiNode = IntSourceNode(IntSourcePortSimple())
 
-  def reportWFI(could_wfi: Option[Bool]): Unit = {
+  def reportWFI(could_wfi: Option[Bool]) {
     val (wfi, _) = wfiNode.out(0)
     wfi(0) := could_wfi.map(RegNext(_, init=false.B)).getOrElse(false.B)
   }

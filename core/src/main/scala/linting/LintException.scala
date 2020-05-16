@@ -21,7 +21,7 @@ object LintException {
     val groupedErrors = seq.groupBy {
       case l: Violation => l.linter.lintName
     }
-    groupedErrors.keys.max
+    val maxErrorNumber = groupedErrors.keys.max
 
     val (_, reports) = groupedErrors.toSeq.sortBy(_._1).reverse.foldRight((0, Seq.empty[String])) {
       case ((lintName: String, lintErrors: Seq[Violation]), (totalErrors: Int, reportsSoFar: Seq[String])) =>

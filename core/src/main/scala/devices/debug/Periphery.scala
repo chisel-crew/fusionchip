@@ -4,18 +4,18 @@ package freechips.rocketchip.devices.debug
 
 import chisel3._
 import chisel3.experimental.IntParam
-import chisel3.util.HasBlackBoxResource
 import chisel3.util._
-import freechips.rocketchip.amba.apb._
+import chisel3.util.HasBlackBoxResource
 import freechips.rocketchip.config.{Field, Parameters}
+import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink._
+import freechips.rocketchip.amba.apb._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.diplomaticobjectmodel.logicaltree.LogicalModuleTree
 import freechips.rocketchip.diplomaticobjectmodel.model.OMComponent
 import freechips.rocketchip.jtag._
-import freechips.rocketchip.subsystem._
-import freechips.rocketchip.tilelink._
 import freechips.rocketchip.util._
+import freechips.rocketchip.tilelink._
 
 /** Protocols used for communicating with external debugging tools */
 sealed trait DebugExportProtocol
@@ -254,10 +254,10 @@ object Debug {
     resetctrlOpt.map { rcio => rcio.hartIsInReset.map { _ := r }}
     debugOpt.map { debug =>
       debug.clockeddmi.foreach { d =>
-        Module(new SimDTM).connect(c, r, d, out)
+        val dtm = Module(new SimDTM).connect(c, r, d, out)
       }
       debug.systemjtag.foreach { sj =>
-        Module(new SimJTAG(tickDelay=3)).connect(sj.jtag, c, r, ~r, out)
+        val jtag = Module(new SimJTAG(tickDelay=3)).connect(sj.jtag, c, r, ~r, out)
         sj.reset := r.asAsyncReset
         sj.mfr_id := p(JtagDTMKey).idcodeManufId.U(11.W)
         sj.part_number := p(JtagDTMKey).idcodePartNum.U(16.W)

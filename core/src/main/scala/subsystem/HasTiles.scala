@@ -6,23 +6,10 @@ import Chisel._
 import chisel3.dontTouch
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.devices.debug.TLDebugModule
-import freechips.rocketchip.devices.tilelink.{
-  BasicBusBlocker,
-  BasicBusBlockerParams,
-  CLINT,
-  CLINTConsts,
-  PLICKey,
-  TLPLIC
-}
+import freechips.rocketchip.devices.tilelink.{BasicBusBlocker, BasicBusBlockerParams, CLINT, CLINTConsts, TLPLIC, PLICKey}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.interrupts._
-import freechips.rocketchip.tile.{
-  BaseTile,
-  HasExternallyDrivenTileConstants,
-  LookupByHartId,
-  LookupByHartIdImpl,
-  TileParams
-}
+import freechips.rocketchip.tile.{BaseTile, LookupByHartId, LookupByHartIdImpl, TileParams, HasExternallyDrivenTileConstants}
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.util._
 
@@ -30,22 +17,18 @@ trait HasTiles extends HasCoreMonitorBundles { this: BaseSubsystem =>
   implicit val p: Parameters
   val tiles: Seq[BaseTile]
   protected def tileParams: Seq[TileParams] = tiles.map(_.tileParams)
-  def nTiles: Int                           = tileParams.size
-  def hartIdList: Seq[Int]                  = tileParams.map(_.hartId)
-  def localIntCounts: Seq[Int]              = tileParams.map(_.core.nLocalInterrupts)
+  def nTiles: Int = tileParams.size
+  def hartIdList: Seq[Int] = tileParams.map(_.hartId)
+  def localIntCounts: Seq[Int] = tileParams.map(_.core.nLocalInterrupts)
 
   // define some nodes that are useful for collecting or driving tile interrupts
   val meipNode = p(PLICKey) match {
     case Some(_) => None
-    case None =>
-      Some(
-        IntNexusNode(
-          sourceFn = { _ => IntSourcePortParameters(Seq(IntSourceParameters(1))) },
-          sinkFn = { _ => IntSinkPortParameters(Seq(IntSinkParameters())) },
-          outputRequiresInput = false,
-          inputRequiresOutput = false
-        )
-      )
+    case None    => Some(IntNexusNode(
+      sourceFn = { _ => IntSourcePortParameters(Seq(IntSourceParameters(1))) },
+      sinkFn   = { _ => IntSinkPortParameters(Seq(IntSinkParameters())) },
+      outputRequiresInput = false,
+      inputRequiresOutput = false))
   }
 
   val tileHaltXbarNode = IntXbar(p)
@@ -60,37 +43,32 @@ trait HasTiles extends HasCoreMonitorBundles { this: BaseSubsystem =>
   val tileCeaseSinkNode = IntSinkNode(IntSinkPortSimple())
   tileCeaseSinkNode := tileCeaseXbarNode
 
-  protected def connectMasterPortsToSBus(tile: BaseTile, crossing: RocketCrossingParams): Unit =
+  protected def connectMasterPortsToSBus(tile: BaseTile, crossing: RocketCrossingParams) {
     locateTLBusWrapper(crossing.master.where).coupleFrom(tile.tileParams.name.getOrElse("tile")) { bus =>
       (bus :=*
         TLBuffer(crossing.master.buffers) :=*
-        crossing.master.cork.map(u => TLCacheCork(unsafe = u)).map(_ :=* tile.crossMasterPort()).getOrElse {
-          tile.crossMasterPort()
-        })
+        crossing.master.cork
+          .map { u => TLCacheCork(unsafe = u) }
+          .map { _ :=* tile.crossMasterPort() }
+          .getOrElse { tile.crossMasterPort() })
     }
+  }
 
-  protected def connectSlavePortsToCBus(tile: BaseTile, crossing: RocketCrossingParams)(
-    implicit valName: ValName
-  ): Unit =
+  protected def connectSlavePortsToCBus(tile: BaseTile, crossing: RocketCrossingParams)(implicit valName: ValName) {
     DisableMonitors { implicit p =>
       locateTLBusWrapper(crossing.slave.where).coupleTo(tile.tileParams.name.getOrElse("tile")) { bus =>
         crossing.slave.blockerCtrlAddr
-          .map(BasicBusBlockerParams(_, pbus.beatBytes, sbus.beatBytes))
-          .map(bbbp => LazyModule(new BasicBusBlocker(bbbp)))
+          .map { BasicBusBlockerParams(_, pbus.beatBytes, sbus.beatBytes) }
+          .map { bbbp => LazyModule(new BasicBusBlocker(bbbp)) }
           .map { bbb =>
-            cbus.coupleTo("bus_blocker")(bbb.controlNode := TLFragmenter(cbus) := _)
+            cbus.coupleTo("bus_blocker") { bbb.controlNode := TLFragmenter(cbus) := _ }
             tile.crossSlavePort() :*= bbb.node
-          }
-          .getOrElse(tile.crossSlavePort()) :*= bus
+          } .getOrElse { tile.crossSlavePort() } :*= bus
       }
     }
+  }
 
-  protected def connectInterrupts(
-    tile: BaseTile,
-    debugOpt: Option[TLDebugModule],
-    clintOpt: Option[CLINT],
-    plicOpt: Option[TLPLIC]
-  ): Unit = {
+  protected def connectInterrupts(tile: BaseTile, debugOpt: Option[TLDebugModule], clintOpt: Option[CLINT], plicOpt: Option[TLPLIC]) {
     // Handle all the different types of interrupts crossing to or from the tile:
     // NOTE: The order of calls to := matters! They must match how interrupts
     //       are decoded from tile.intInwardNode inside the tile. For this reason,
@@ -98,23 +76,28 @@ trait HasTiles extends HasCoreMonitorBundles { this: BaseSubsystem =>
 
     // 1. Debug interrupt is definitely asynchronous in all cases.
     tile.intInwardNode :=
-      debugOpt.map(tile(IntSyncAsyncCrossingSink(3)) := _.intnode).getOrElse(NullIntSource())
+      debugOpt
+        .map { tile { IntSyncAsyncCrossingSink(3) } := _.intnode }
+        .getOrElse { NullIntSource() }
 
     // 2. The CLINT and PLIC output interrupts are synchronous to the TileLink bus clock,
     //    so might need to be synchronized depending on the Tile's crossing type.
 
     //    From CLINT: "msip" and "mtip"
     tile.crossIntIn() :=
-      clintOpt.map(_.intnode).getOrElse(NullIntSource(sources = CLINTConsts.ints))
+      clintOpt.map { _.intnode }
+        .getOrElse { NullIntSource(sources = CLINTConsts.ints) }
 
     //    From PLIC: "meip"
     tile.crossIntIn() :=
-      plicOpt.map(_.intnode).getOrElse(meipNode.get)
+      plicOpt .map { _.intnode }
+        .getOrElse { meipNode.get }
 
     //    From PLIC: "seip" (only if supervisor mode is enabled)
     if (tile.tileParams.core.hasSupervisorMode) {
       tile.crossIntIn() :=
-        plicOpt.map(_.intnode).getOrElse(NullIntSource())
+        plicOpt .map { _.intnode }
+          .getOrElse { NullIntSource() }
     }
 
     // 3. Local Interrupts ("lip") are required to already be synchronous to the Tile's clock.
@@ -122,7 +105,11 @@ trait HasTiles extends HasCoreMonitorBundles { this: BaseSubsystem =>
 
     // 4. Interrupts coming out of the tile are sent to the PLIC,
     //    so might need to be synchronized depending on the Tile's crossing type.
-    plicOpt.foreach(plic => FlipRendering(implicit p => plic.intnode :=* tile.crossIntOut()))
+    plicOpt.foreach { plic =>
+      FlipRendering { implicit p =>
+        plic.intnode :=* tile.crossIntOut()
+      }
+    }
 
     // 5. Reports of tile status are collected without needing to be clock-crossed
     tileHaltXbarNode := tile.haltNode
@@ -131,9 +118,9 @@ trait HasTiles extends HasCoreMonitorBundles { this: BaseSubsystem =>
   }
 
   protected def perTileOrGlobalSetting[T](in: Seq[T], n: Int): Seq[T] = in.size match {
-    case 1           => List.fill(n)(in.head)
+    case 1 => List.fill(n)(in.head)
     case x if x == n => in
-    case _           => throw new Exception("must provide exactly 1 or #tiles of this key")
+    case _ => throw new Exception("must provide exactly 1 or #tiles of this key")
   }
 }
 
@@ -149,11 +136,10 @@ trait HasTilesModuleImp extends LazyModuleImp {
 
   val tile_inputs = outer.tiles.map(_.module.constants)
 
-  val meip = if (outer.meipNode.isDefined) Some(IO(Vec(outer.meipNode.get.out.size, Bool()).asInput)) else None
+  val meip = if(outer.meipNode.isDefined) Some(IO(Vec(outer.meipNode.get.out.size, Bool()).asInput)) else None
   meip.foreach { m =>
-    m.zipWithIndex.foreach {
-      case (pin, i) =>
-        (outer.meipNode.get.out(i)._1)(0) := pin
+    m.zipWithIndex.foreach{ case (pin, i) =>
+      (outer.meipNode.get.out(i)._1)(0) := pin
     }
   }
 }

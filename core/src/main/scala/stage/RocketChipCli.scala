@@ -10,7 +10,8 @@ trait RocketChipCli { this: Shell =>
   Seq(
     TopModuleAnnotation,
     ConfigsAnnotation,
-    OutputBaseNameAnnotation
-  ).foreach(_.addOptions(parser))
+    OutputBaseNameAnnotation,
+  )
+    .foreach(_.addOptions(parser))
 
 }

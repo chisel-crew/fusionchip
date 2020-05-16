@@ -4,6 +4,7 @@ package freechips.rocketchip.regmapper
 
 import Chisel._
 import chisel3.util.{Irrevocable}
+
 import freechips.rocketchip.util.{AsyncQueue,AsyncQueueParams,AsyncResetRegVec}
 
 // A very simple flow control state machine, run in the specified clock domain

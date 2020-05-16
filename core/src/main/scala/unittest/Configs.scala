@@ -7,8 +7,8 @@ import freechips.rocketchip.amba.ahb._
 import freechips.rocketchip.amba.apb._
 import freechips.rocketchip.amba.axi4._
 import freechips.rocketchip.config._
-import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.subsystem.{BaseSubsystemConfig}
+import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.util._
 

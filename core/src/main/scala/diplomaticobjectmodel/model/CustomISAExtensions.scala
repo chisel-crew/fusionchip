@@ -2,7 +2,10 @@
 
 package freechips.rocketchip.diplomaticobjectmodel.model
 
-trait OMCustomExtensionSpecification {
+
+import scala.collection.mutable
+
+trait OMCustomExtensionSpecification{
   def name: String
   def version: String
   def _types: Seq[String] = Seq("OMCustomExtensionSpecification", "OMSpecification")

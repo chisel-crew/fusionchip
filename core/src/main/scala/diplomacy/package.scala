@@ -2,11 +2,10 @@
 
 package freechips.rocketchip
 
-import scala.language.implicitConversions
-
-import chisel3.Data
 import chisel3.internal.sourceinfo.{SourceInfo, SourceLine, UnlocatableSourceInfo}
+import chisel3.Data
 import freechips.rocketchip.config.Parameters
+import scala.language.implicitConversions
 
 package object diplomacy
 {
@@ -27,7 +26,7 @@ package object diplomacy
     }
   }
 
-  implicit class BigIntHexContext(private val sc: StringContext) extends AnyVal {
+  implicit class BigIntHexContext(val sc: StringContext) extends AnyVal {
     def x(args: Any*): BigInt = {
       val orig = sc.s(args: _*)
       BigInt(orig.replace("_", ""), 16)

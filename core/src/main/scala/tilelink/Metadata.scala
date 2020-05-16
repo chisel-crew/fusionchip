@@ -52,9 +52,9 @@ class ClientMetadata extends Bundle {
 
   /** Determine whether this cmd misses, and the new state (on hit) or param to be sent (on miss) */
   private def growStarter(cmd: UInt): (Bool, UInt) = {
-    import ClientStates._
     import MemoryOpCategories._
     import TLPermissions._
+    import ClientStates._
     val c = categorize(cmd)
     MuxTLookup(
       Cat(c, state),
@@ -82,9 +82,9 @@ class ClientMetadata extends Bundle {
    * For now, doesn't depend on state (which may have been Probed).
    */
   private def growFinisher(cmd: UInt, param: UInt): UInt = {
-    import ClientStates._
     import MemoryOpCategories._
     import TLPermissions._
+    import ClientStates._
     val c = categorize(cmd)
     //assert(c === rd || param === toT, "Client was expecting trunk permissions.")
     MuxLookup(

@@ -3,8 +3,8 @@
 
 package freechips.rocketchip.rocket
 
-import Chisel.ImplicitConversions._
 import Chisel._
+import Chisel.ImplicitConversions._
 import chisel3.internal.InstanceId
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.subsystem.CacheBlockBytes

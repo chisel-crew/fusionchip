@@ -2,12 +2,11 @@
 
 package freechips.rocketchip.tilelink
 
-import scala.math.{min,max}
-
 import Chisel._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.util._
+import scala.math.{min,max}
 
 object EarlyAck {
   sealed trait T
@@ -285,7 +284,7 @@ class TLFragmenter(val minSize: Int, val maxSize: Int, val alwaysMin: Boolean = 
         val old_gennum1 = Mux(aFirst, aOrigOH1 >> log2Ceil(beatBytes), gennum - UInt(1))
         val new_gennum = ~(~old_gennum1 | (aMask >> log2Ceil(beatBytes))) // ~(~x|y) is width safe
         val aFragnum = ~(~(old_gennum1 >> log2Ceil(minSize/beatBytes)) | (aFragOH1 >> log2Ceil(minSize)))
-        aFragnum === UInt(0)
+        val aLast = aFragnum === UInt(0)
         val aToggle = !Mux(aFirst, dToggle, RegEnable(dToggle, aFirst))
         val aFull = if (earlyAck == EarlyAck.PutFulls) Some(in_a.bits.opcode === TLMessages.PutFullData) else None
 

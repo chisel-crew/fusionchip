@@ -3,9 +3,10 @@
 package freechips.rocketchip.tilelink
 
 import Chisel.{defaultCompileOptions => _, _}
+import freechips.rocketchip.util.CompileOptions.NotStrictInferReset
+
 import TLMessages._
 import TLPermissions._
-import freechips.rocketchip.util.CompileOptions.NotStrictInferReset
 
 class Atomics(params: TLBundleParameters) extends Module
 {

@@ -3,8 +3,8 @@
 package freechips.rocketchip.scie
 
 import chisel3._
-import chisel3.experimental.{IntParam, fromIntToIntParam}
 import chisel3.util.{BitPat, HasBlackBoxInline}
+import chisel3.experimental.{IntParam, fromIntToIntParam}
 
 object SCIE {
   val opcode = BitPat("b?????????????????????????0?01011")

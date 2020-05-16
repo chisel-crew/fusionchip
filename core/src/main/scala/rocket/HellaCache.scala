@@ -3,18 +3,17 @@
 
 package freechips.rocketchip.rocket
 
-import scala.collection.mutable.ListBuffer
-
 import Chisel._
 import chisel3.dontTouch
 import freechips.rocketchip.amba._
 import freechips.rocketchip.config.{Parameters, Field}
+import freechips.rocketchip.subsystem._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.diplomaticobjectmodel.model.OMSRAM
-import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tile._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.util._
+import scala.collection.mutable.ListBuffer
 
 case class DCacheParams(
     nSets: Int = 64,

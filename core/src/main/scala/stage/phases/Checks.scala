@@ -2,12 +2,12 @@
 
 package freechips.rocketchip.stage.phases
 
-import scala.collection.mutable
-
 import firrtl.AnnotationSeq
 import firrtl.annotations.Annotation
 import firrtl.options.{OptionsException, Phase, PreservesAll, TargetDirAnnotation}
 import freechips.rocketchip.stage._
+
+import scala.collection.mutable
 
 /** Checks for the correct type and number of command line arguments */
 class Checks extends Phase with PreservesAll[Phase] {

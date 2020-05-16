@@ -51,7 +51,7 @@ object Emit extends App {
     case _ => new RuntimeException("Invalid entity provided")
   }
 
-  emitEntity("vlog")
+  emitEntity("soc")
 }
 
 object EEE {

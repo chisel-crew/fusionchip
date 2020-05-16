@@ -2,10 +2,9 @@
 
 package freechips.rocketchip.diplomacy
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
-
 import freechips.rocketchip.config.Field
 import sys.process._
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 case object DTSModel    extends Field[String]
 case object DTSCompat   extends Field[Seq[String]] // -dev, -soc

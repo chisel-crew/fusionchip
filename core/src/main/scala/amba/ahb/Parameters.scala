@@ -2,13 +2,12 @@
 
 package freechips.rocketchip.amba.ahb
 
-import scala.math.{max, min}
-
 import Chisel._
 import chisel3.internal.sourceinfo.SourceInfo
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.util._
+import scala.math.{max, min}
 
 case class AHBSlaveParameters(
   address:       Seq[AddressSet],

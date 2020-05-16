@@ -1,6 +1,7 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.subsystem
+
 import Chisel._
 import freechips.rocketchip.config._
 import freechips.rocketchip.devices.tilelink._
@@ -16,11 +17,12 @@ case class MemoryBusParams(
   dtsFrequency: Option[BigInt] = None,
   zeroDevice: Option[AddressSet] = None,
   errorDevice: Option[DevNullParams] = None,
-  replication: Option[ReplicatedRegion] = None
-) extends HasTLBusParams
-    with HasBuiltInDeviceParams
-    with HasRegionReplicatorParams
-    with TLBusWrapperInstantiationLike {
+  replication: Option[ReplicatedRegion] = None)
+  extends HasTLBusParams
+  with HasBuiltInDeviceParams
+  with HasRegionReplicatorParams
+  with TLBusWrapperInstantiationLike
+{
   def instantiate(context: HasTileLinkLocations, loc: Location[TLBusWrapper])(implicit p: Parameters): MemoryBus = {
     val mbus = LazyModule(new MemoryBus(this, loc.name))
     mbus.suggestName(loc.name)
@@ -31,18 +33,18 @@ case class MemoryBusParams(
 
 /** Wrapper for creating TL nodes from a bus connected to the back of each mem channel */
 class MemoryBus(params: MemoryBusParams, name: String = "memory_bus")(implicit p: Parameters)
-    extends TLBusWrapper(params, name)(p) {
+    extends TLBusWrapper(params, name)(p)
+{
   private val replicator = params.replication.map(r => LazyModule(new RegionReplicator(r)))
-  val prefixNode         = replicator.map(_.prefix)
+  val prefixNode = replicator.map(_.prefix)
 
   private val xbar = LazyModule(new TLXbar).suggestName(busName + "_xbar")
   val inwardNode: TLInwardNode =
-    replicator
-      .map(xbar.node :*=* TLFIFOFixer(TLFIFOFixer.all) :*=* _.node)
-      .getOrElse(xbar.node :*=* TLFIFOFixer(TLFIFOFixer.all))
+    replicator.map(xbar.node :*=* TLFIFOFixer(TLFIFOFixer.all) :*=* _.node)
+        .getOrElse(xbar.node :*=* TLFIFOFixer(TLFIFOFixer.all))
 
   val outwardNode: TLOutwardNode = ProbePicker() :*= xbar.node
-  def busView: TLEdge            = xbar.node.edges.in.head
+  def busView: TLEdge = xbar.node.edges.in.head
 
   val builtInDevices: BuiltInDevices = BuiltInDevices.attach(params, outwardNode)
 }

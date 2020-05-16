@@ -245,7 +245,7 @@ object JtagTapGenerator {
       controllerInternal.io.dataChainIn := bypassChain.io.chainOut
     }
 
-    def mapInSelect(x: (Chain, Bool)): Unit = {
+    def mapInSelect(x: (Chain, Bool)) {
       val (chain, select) = x
       when (select) {
         chain.io.chainIn := controllerInternal.io.dataChainOut

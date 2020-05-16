@@ -9,9 +9,9 @@ import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.diplomaticobjectmodel.logicaltree.{DCacheLogicalTreeNode, LogicalModuleTree, LogicalTreeNode, RocketLogicalTreeNode}
 import freechips.rocketchip.interrupts._
+import freechips.rocketchip.tilelink._
 import freechips.rocketchip.rocket._
 import freechips.rocketchip.subsystem.{SubsystemResetSchemeKey, ResetSynchronous, RocketCrossingParams, HartPrefixKey}
-import freechips.rocketchip.tilelink._
 import freechips.rocketchip.util._
 
 case class RocketTileParams(

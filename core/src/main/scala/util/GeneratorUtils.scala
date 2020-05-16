@@ -2,29 +2,25 @@
 
 package freechips.rocketchip.util
 
-import java.io.{ File, FileWriter }
+import java.io.{File, FileWriter}
 
 import Chisel.throwException
-import chipsalliance.rocketchip.config.{ Config, Parameters }
+import chipsalliance.rocketchip.config.{Config, Parameters}
 import chisel3.internal.firrtl.Circuit
 
 trait HasRocketChipStageUtils {
 
-  def getConfig(fullConfigClassNames: Seq[String]): Config =
-    new Config(fullConfigClassNames.foldRight(Parameters.empty) {
-      case (currentName, config) =>
-        val currentConfig =
-          try {
-            Class.forName(currentName).newInstance.asInstanceOf[Config]
-          } catch {
-            case e: java.lang.ClassNotFoundException =>
-              throwException(
-                s"""Unable to find part "$currentName" from "$fullConfigClassNames", did you misspell it?""",
-                e
-              )
-          }
-        currentConfig ++ config
+  def getConfig(fullConfigClassNames: Seq[String]): Config = {
+    new Config(fullConfigClassNames.foldRight(Parameters.empty) { case (currentName, config) =>
+      val currentConfig = try {
+        Class.forName(currentName).newInstance.asInstanceOf[Config]
+      } catch {
+        case e: java.lang.ClassNotFoundException =>
+          throwException(s"""Unable to find part "$currentName" from "$fullConfigClassNames", did you misspell it?""", e)
+      }
+      currentConfig ++ config
     })
+  }
 
   def enumerateROMs(circuit: Circuit): String = {
     val res = new StringBuilder
@@ -32,18 +28,17 @@ trait HasRocketChipStageUtils {
       circuit.components flatMap { m =>
         m.id match {
           case rom: BlackBoxedROM => Some((rom.name, ROMGenerator.lookup(rom)))
-          case _                  => None
+          case _ => None
         }
       }
-    configs foreach {
-      case (name, c) =>
-        res append s"name ${name} depth ${c.depth} width ${c.width}\n"
+    configs foreach { case (name, c) =>
+      res append s"name ${name} depth ${c.depth} width ${c.width}\n"
     }
     res.toString
   }
 
   def writeOutputFile(targetDir: String, fname: String, contents: String): File = {
-    val f  = new File(targetDir, fname)
+    val f = new File(targetDir, fname)
     val fw = new FileWriter(f)
     fw.write(contents)
     fw.close
@@ -55,9 +50,11 @@ trait HasRocketChipStageUtils {
 object ElaborationArtefacts {
   var files: Seq[(String, () => String)] = Nil
 
-  def add(extension: String, contents: => String): Unit =
+  def add(extension: String, contents: => String) {
     files = (extension, () => contents) +: files
+  }
 
-  def contains(extension: String): Boolean =
-    files.foldLeft(false)((t, s) => s._1 == extension | t)
+  def contains(extension: String): Boolean = {
+    files.foldLeft(false)((t, s) => {s._1 == extension | t})
+  }
 }

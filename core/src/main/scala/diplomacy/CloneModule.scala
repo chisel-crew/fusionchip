@@ -5,15 +5,14 @@
 
 package chisel3.shim
 
-import scala.collection.immutable.ListMap
-import scala.collection.mutable.ArrayBuffer
-
 import Chisel._
-import chisel3.core.UserModule
 import chisel3.experimental.BaseModule
+import chisel3.{RawModule, MultiIOModule}
+import chisel3.core.UserModule
 import chisel3.internal.Builder
 import chisel3.internal.firrtl.{Command, DefInstance}
-import chisel3.{RawModule, MultiIOModule}
+import scala.collection.immutable.ListMap
+import scala.collection.mutable.ArrayBuffer
 
 class ClonePorts protected[shim](elts: Data*) extends Record
 {
@@ -23,7 +22,8 @@ class ClonePorts protected[shim](elts: Data*) extends Record
 }
 
 class CloneModule private (model: RawModule) extends BlackBox
-{import CloneModule._
+{
+  import CloneModule._
   override def desiredName = model.name
   val io = IO(new ClonePorts(model.getPorts.map(_.id): _*))
 }

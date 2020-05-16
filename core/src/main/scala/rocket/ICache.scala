@@ -3,20 +3,20 @@
 
 package freechips.rocketchip.rocket
 
-import Chisel.ImplicitConversions._
 import Chisel._
-import chisel3.dontTouch
-import chisel3.internal.sourceinfo.SourceInfo
-import chisel3.util.random.LFSR
+import Chisel.ImplicitConversions._
 import freechips.rocketchip.amba._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.diplomaticobjectmodel.DiplomaticObjectModelAddressing
-import freechips.rocketchip.diplomaticobjectmodel.model._
 import freechips.rocketchip.tile._
 import freechips.rocketchip.tilelink._
-import freechips.rocketchip.util.property._
 import freechips.rocketchip.util.{DescribedSRAM, _}
+import freechips.rocketchip.util.property._
+import chisel3.internal.sourceinfo.SourceInfo
+import chisel3.dontTouch
+import chisel3.util.random.LFSR
+import freechips.rocketchip.diplomaticobjectmodel.DiplomaticObjectModelAddressing
+import freechips.rocketchip.diplomaticobjectmodel.model._
 
 case class ICacheParams(
     nSets: Int = 64,

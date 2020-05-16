@@ -7,15 +7,18 @@ import Chisel._
 import freechips.rocketchip.util._
 import freechips.rocketchip.util.property._
 
-class EventSet(gate: (UInt, UInt) => Bool, events: Seq[(String, () => Bool)]) {
+class EventSet(gate: (UInt, UInt) => Bool, val events: Seq[(String, () => Bool)]) {
   def size = events.size
-  def hits = events.map(_._2()).asUInt
-  def check(mask: UInt) = gate(mask, hits)
-  def dump(): Unit = {
+  val hits = Wire(Vec(size, Bool()))
+  def check(mask: UInt) = {
+    hits := events.map(_._2())
+    gate(mask, hits.asUInt)
+  }
+  def dump() {
     for (((name, _), i) <- events.zipWithIndex)
       when (check(1.U << i)) { printf(s"Event $name\n") }
   }
-  def withCovers: Unit = {
+  def withCovers {
     events.zipWithIndex.foreach {
       case ((name, func), i) => cover(gate((1.U << i), (func() << i)), name)
     }
@@ -49,7 +52,7 @@ class EventSets(val eventSets: Seq[EventSet]) {
   private def eventSetIdBits = 8
 }
 
-class SuperscalarEventSets(eventSets: Seq[(Seq[EventSet], (UInt, UInt) => UInt)]) {
+class SuperscalarEventSets(val eventSets: Seq[(Seq[EventSet], (UInt, UInt) => UInt)]) {
   def evaluate(eventSel: UInt): UInt = {
     val (set, mask) = decode(eventSel)
     val sets = for ((sets, reducer) <- eventSets)
@@ -60,7 +63,7 @@ class SuperscalarEventSets(eventSets: Seq[(Seq[EventSet], (UInt, UInt) => UInt)]
 
   def toScalarEventSets: EventSets = new EventSets(eventSets.map(_._1.head))
 
-  def cover(): Unit = { eventSets.foreach(_._1.foreach(_.withCovers)) }
+  def cover() { eventSets.foreach(_._1.foreach(_.withCovers)) }
 
   private def decode(counter: UInt): (UInt, UInt) = {
     require(eventSetIdBits > 0)
