@@ -4,15 +4,14 @@ package freechips.rocketchip.amba.ahb
 
 import Chisel._
 
-object AHBParameters
-{
+object AHBParameters {
   // These are all fixed by the AHB standard:
   val transBits = 2
   val burstBits = 3
   val protBits  = 4
-  val sizeBits  = 3  // 8*2^s
+  val sizeBits  = 3 // 8*2^s
   val userBits  = 3
-  val hrespBits = 2  // AHB full
+  val hrespBits = 2 // AHB full
 
   def TRANS_IDLE   = UInt(0, width = transBits) // No transfer requested, not in a burst
   def TRANS_BUSY   = UInt(1, width = transBits) // No transfer requested, in a burst
@@ -30,15 +29,15 @@ object AHBParameters
 
   val maxTransfer = 16
 
-  def RESP_OKAY  = UInt(0, width=2)
-  def RESP_ERROR = UInt(1, width=2)
+  def RESP_OKAY  = UInt(0, width = 2)
+  def RESP_ERROR = UInt(1, width = 2)
   // Only in AHB-Full:
-  def RESP_RETRY = UInt(2, width=2)
-  def RESP_SPLIT = UInt(3, width=2)
+  def RESP_RETRY = UInt(2, width = 2)
+  def RESP_SPLIT = UInt(3, width = 2)
 
   def PROT_DATA        = UInt(1, width = protBits)
   def PROT_PRIVILEDGED = UInt(2, width = protBits)
   def PROT_BUFFERABLE  = UInt(4, width = protBits)
   def PROT_CACHEABLE   = UInt(8, width = protBits)
-  def PROT_DEFAULT = PROT_DATA | PROT_PRIVILEDGED
+  def PROT_DEFAULT     = PROT_DATA | PROT_PRIVILEDGED
 }

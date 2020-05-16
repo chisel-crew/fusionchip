@@ -4,8 +4,8 @@
 package freechips.rocketchip.util
 
 import chisel3._
-import chisel3.util._
 import chisel3.experimental.ChiselEnum
+import chisel3.util._
 import freechips.rocketchip.tile._
 
 // Definitions for Trace core Interface defined in RISC-V Processor Trace Specification V1.0
@@ -28,24 +28,23 @@ object TraceItype extends ChiselEnum {
   val ITInJump    = Value(15.U)
 }
 
-class TraceCoreParams (
+class TraceCoreParams(
   val nGroups: Int = 1,
   val iretireWidth: Int = 1,
   val xlen: Int = 32,
   val iaddrWidth: Int = 32
 )
 
-class TraceCoreGroup (val params: TraceCoreParams) extends Bundle {
-  val iretire = UInt(params.iretireWidth.W)
-  val iaddr = UInt(params.iaddrWidth.W)
-  val itype = TraceItype()
+class TraceCoreGroup(val params: TraceCoreParams) extends Bundle {
+  val iretire   = UInt(params.iretireWidth.W)
+  val iaddr     = UInt(params.iaddrWidth.W)
+  val itype     = TraceItype()
   val ilastsize = UInt(1.W)
 }
 
-class TraceCoreInterface (val params: TraceCoreParams) extends Bundle {
+class TraceCoreInterface(val params: TraceCoreParams) extends Bundle {
   val group = Vec(params.nGroups, new TraceCoreGroup(params))
-  val priv = UInt(4.W)
-  val tval = UInt(params.xlen.W)
+  val priv  = UInt(4.W)
+  val tval  = UInt(params.xlen.W)
   val cause = UInt(params.xlen.W)
 }
-

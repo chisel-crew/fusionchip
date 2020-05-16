@@ -3,10 +3,10 @@
 package freechips.rocketchip.devices.debug
 import chisel3._
 import chisel3.experimental._
+import freechips.rocketchip.amba.apb.{ APBRegisterNode }
 import freechips.rocketchip.config._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.regmapper._
-import freechips.rocketchip.amba.apb.{APBRegisterNode}
 
 case object APBDebugRegistersKey extends Field[Map[Int, Seq[RegField]]](Map())
 
@@ -18,15 +18,13 @@ object APBDebugConsts {
 class APBDebugRegisters()(implicit p: Parameters) extends LazyModule {
 
   val node = APBRegisterNode(
-    address = AddressSet(base=APBDebugConsts.apbDebugRegBase, mask=APBDebugConsts.apbDebugRegSize-1),
+    address = AddressSet(base = APBDebugConsts.apbDebugRegBase, mask = APBDebugConsts.apbDebugRegSize - 1),
     beatBytes = 4,
     executable = false
   )
 
-  lazy val module = new LazyModuleImp(this){
-    node.regmap(p(APBDebugRegistersKey).toList:_*)
+  lazy val module = new LazyModuleImp(this) {
+    node.regmap(p(APBDebugRegistersKey).toList: _*)
 
   }
 }
-
-

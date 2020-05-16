@@ -33,11 +33,10 @@ case class OMRocketCore(
 ) extends OMCore
 
 object OMBTB {
-  def makeOMI(p: BTBParams): OMRocketBranchPredictor = {
+  def makeOMI(p: BTBParams): OMRocketBranchPredictor =
     OMRocketBranchPredictor(
       nBtbEntries = p.nEntries,
       nBhtEntries = p.bhtParams.map(_.nEntries).getOrElse(0),
       nRasEntries = p.nRAS
     )
-  }
 }

@@ -15,7 +15,7 @@ trait SimpleProduct extends Product with Equals {
   override def equals(other: Any): Boolean = other match {
     case that: SimpleProduct =>
       def canEq = that.canEqual(this) && this.canEqual(that)
-      def iter = that.productIterator zip this.productIterator
+      def iter  = that.productIterator zip this.productIterator
       canEq && iter.forall { case (a, b) => a == b }
     case _ => false
   }
@@ -23,7 +23,7 @@ trait SimpleProduct extends Product with Equals {
   override def hashCode: Int = scala.util.hashing.MurmurHash3.productHash(this)
 
   override def toString: String = {
-    val b = new StringBuilder(productPrefix)
+    val b    = new StringBuilder(productPrefix)
     val iter = productIterator
     b += '('
     if (iter.hasNext) {

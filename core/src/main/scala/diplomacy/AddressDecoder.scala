@@ -2,8 +2,9 @@
 
 package freechips.rocketchip.diplomacy
 
-import Chisel.log2Ceil
 import scala.math.{max,min}
+
+import Chisel.log2Ceil
 
 object AddressDecoder
 {

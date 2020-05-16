@@ -19,21 +19,21 @@ package object amba {
   case object AMBAProt extends ControlKey[AMBAProtBundle]("amba_prot")
   case class AMBAProtField() extends BundleField(AMBAProt) {
     def data = Output(new AMBAProtBundle)
-    def default(x: AMBAProtBundle) {
+    def default(x: AMBAProtBundle): Unit = {
       x.bufferable := false.B
       x.modifiable := false.B
-      x.readalloc  := false.B
+      x.readalloc := false.B
       x.writealloc := false.B
       x.privileged := true.B
-      x.secure     := true.B
-      x.fetch      := false.B
+      x.secure := true.B
+      x.fetch := false.B
     }
   }
 
   // Used to convert a TileLink corrupt signal into an AMBA user bit
   case object AMBACorrupt extends DataKey[Bool]("corrupt")
   case class AMBACorruptField() extends BundleField(AMBACorrupt) {
-    def data = Output(Bool())
-    def default(x: Bool) { x := false.B }
+    def data                   = Output(Bool())
+    def default(x: Bool): Unit = x := false.B
   }
 }

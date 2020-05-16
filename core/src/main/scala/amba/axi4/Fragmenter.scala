@@ -2,12 +2,13 @@
 
 package freechips.rocketchip.amba.axi4
 
+import scala.math.{min,max}
+
 import Chisel._
 import chisel3.util.IrrevocableIO
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.util._
-import scala.math.{min,max}
 
 case object AXI4FragLast extends ControlKey[Bool]("real_last")
 case class AXI4FragLastField() extends SimpleBundleField(AXI4FragLast)(Output(Bool()), false.B)
@@ -34,7 +35,7 @@ class AXI4Fragmenter()(implicit p: Parameters) extends LazyModule
       val beatBytes = slave.beatBytes
       val lgBytes   = log2Ceil(beatBytes)
       val master    = edgeIn.master
-      val masters   = master.masters
+      master.masters
 
       // We don't support fragmenting to sub-beat accesses
       slaves.foreach { s =>
@@ -65,7 +66,7 @@ class AXI4Fragmenter()(implicit p: Parameters) extends LazyModule
         val len  = Mux(busy, r_len,  a.bits.len)
         val addr = Mux(busy, r_addr, a.bits.addr)
 
-        val lo = if (lgBytes == 0) UInt(0) else addr(lgBytes-1, 0)
+        if (lgBytes == 0) UInt(0) else addr(lgBytes-1, 0)
         val cutoff = AXI4Parameters.lenBits + lgBytes
         val alignment = addr((a.bits.params.addrBits min cutoff)-1, lgBytes)
 

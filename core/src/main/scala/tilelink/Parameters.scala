@@ -2,13 +2,14 @@
 
 package freechips.rocketchip.tilelink
 
+import scala.math.max
+import scala.reflect.ClassTag
+
 import Chisel._
 import chisel3.internal.sourceinfo.SourceInfo
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.util._
-import scala.math.max
-import scala.reflect.ClassTag
 
 case class TLMasterToSlaveTransferSizes(
   // Supports both Acquire+Release of the following two sizes:

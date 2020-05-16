@@ -3,17 +3,18 @@
 
 package freechips.rocketchip.rocket
 
-import Chisel._
+import scala.collection.immutable.ListMap
+import scala.collection.mutable.ArrayBuffer
+
 import Chisel.ImplicitConversions._
-import chisel3.withClock
+import Chisel._
 import chisel3.experimental.{chiselName, NoChiselNamePrefix}
+import chisel3.withClock
 import freechips.rocketchip.config.Parameters
+import freechips.rocketchip.scie._
 import freechips.rocketchip.tile._
 import freechips.rocketchip.util._
 import freechips.rocketchip.util.property._
-import freechips.rocketchip.scie._
-import scala.collection.immutable.ListMap
-import scala.collection.mutable.ArrayBuffer
 
 case class RocketCoreParams(
   bootFreqHz: BigInt = 0,

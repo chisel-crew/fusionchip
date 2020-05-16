@@ -2,15 +2,15 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.util
+import scala.math.log10
 
 import chisel3.internal.InstanceId
-import chisel3.{Data, SyncReadMem, Vec}
 import chisel3.util.log2Ceil
+import chisel3.{ Data, SyncReadMem, Vec }
 import freechips.rocketchip.amba.axi4.AXI4RAM
 import freechips.rocketchip.diplomacy.DiplomaticSRAM
 import freechips.rocketchip.diplomaticobjectmodel.DiplomaticObjectModelAddressing
-import freechips.rocketchip.diplomaticobjectmodel.model.{OMSRAM, OMRTLModule}
-import scala.math.log10
+import freechips.rocketchip.diplomaticobjectmodel.model.{ OMRTLModule, OMSRAM }
 
 object DescribedSRAM {
   def apply[T <: Data](
@@ -26,7 +26,7 @@ object DescribedSRAM {
 
     val granWidth = data match {
       case v: Vec[_] => v.head.getWidth
-      case d => d.getWidth
+      case d         => d.getWidth
     }
 
     val uid = 0
@@ -37,7 +37,7 @@ object DescribedSRAM {
       depth = size,
       granWidth = granWidth,
       uid = uid,
-      rtlModule = OMRTLModule(moduleName=name)
+      rtlModule = OMRTLModule(moduleName = name)
     )
 
     Annotated.srams(

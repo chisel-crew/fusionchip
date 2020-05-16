@@ -48,8 +48,7 @@ case object SlowToFast extends RationalDirection {
   def flip = FastToSlow
 }
 
-final class RationalIO[T <: Data](gen: T) extends Bundle
-{
+final class RationalIO[T <: Data](gen: T) extends Bundle {
   val bits0  = Output(gen)
   val bits1  = Output(gen)
   val valid  = Output(Bool())
@@ -60,23 +59,21 @@ final class RationalIO[T <: Data](gen: T) extends Bundle
   override def cloneType: this.type = new RationalIO(gen).asInstanceOf[this.type]
 }
 
-object RationalIO
-{
+object RationalIO {
   def apply[T <: Data](gen: T) = new RationalIO(gen)
 }
 
-class RationalCrossingSource[T <: Data](gen: T, direction: RationalDirection = Symmetric) extends Module
-{
+class RationalCrossingSource[T <: Data](gen: T, direction: RationalDirection = Symmetric) extends Module {
   val io = IO(new Bundle {
     val enq = Flipped(DecoupledIO(gen))
     val deq = RationalIO(gen)
   })
 
   val enq_in = BlockDuringReset(io.enq)
-  val deq = io.deq
+  val deq    = io.deq
   val enq = direction match {
-    case Symmetric  => ShiftQueue(enq_in, 1, flow=true)
-    case Flexible => ShiftQueue(enq_in, 2)
+    case Symmetric  => ShiftQueue(enq_in, 1, flow = true)
+    case Flexible   => ShiftQueue(enq_in, 2)
     case FastToSlow => enq_in
     case SlowToFast => ShiftQueue(enq_in, 2)
   }
@@ -84,25 +81,24 @@ class RationalCrossingSource[T <: Data](gen: T, direction: RationalDirection = S
   val count = RegInit(0.U(2.W))
   val equal = count === deq.sink
 
-  deq.valid  := enq.valid
+  deq.valid := enq.valid
   deq.source := count
-  deq.bits0  := enq.bits
-  deq.bits1  := RegEnable(enq.bits, equal)
-  enq.ready  := Mux(equal, deq.ready, count(1) =/= deq.sink(0))
+  deq.bits0 := enq.bits
+  deq.bits1 := RegEnable(enq.bits, equal)
+  enq.ready := Mux(equal, deq.ready, count(1) =/= deq.sink(0))
 
-  when (enq.fire()) { count := Cat(count(0), !count(1)) }
+  when(enq.fire())(count := Cat(count(0), !count(1)))
 
   // Ensure the clocking is setup correctly
   direction match {
     case Symmetric  => () // always safe
     case Flexible   => ()
-    case FastToSlow => assert (equal || count(1) === deq.sink(0))
-    case SlowToFast => assert (equal || count(1) =/= deq.sink(0))
+    case FastToSlow => assert(equal || count(1) === deq.sink(0))
+    case SlowToFast => assert(equal || count(1) =/= deq.sink(0))
   }
 }
 
-class RationalCrossingSink[T <: Data](gen: T, direction: RationalDirection = Symmetric) extends Module
-{
+class RationalCrossingSink[T <: Data](gen: T, direction: RationalDirection = Symmetric) extends Module {
   val io = IO(new Bundle {
     val enq = Flipped(RationalIO(gen))
     val deq = Decoupled(gen)
@@ -111,7 +107,7 @@ class RationalCrossingSink[T <: Data](gen: T, direction: RationalDirection = Sym
   val enq = io.enq
   val deq = Wire(chiselTypeOf(io.deq))
   direction match {
-    case Symmetric  => io.deq <> ShiftQueue(deq, 1, pipe=true)
+    case Symmetric  => io.deq <> ShiftQueue(deq, 1, pipe = true)
     case Flexible   => io.deq <> ShiftQueue(deq, 2)
     case FastToSlow => io.deq <> ShiftQueue(deq, 2)
     case SlowToFast => io.deq <> deq
@@ -121,23 +117,22 @@ class RationalCrossingSink[T <: Data](gen: T, direction: RationalDirection = Sym
   val equal = count === enq.source
 
   enq.ready := deq.ready
-  enq.sink  := count
-  deq.bits  := Mux(equal, enq.bits0, enq.bits1)
+  enq.sink := count
+  deq.bits := Mux(equal, enq.bits0, enq.bits1)
   deq.valid := Mux(equal, enq.valid, count(1) =/= enq.source(0))
 
-  when (deq.fire()) { count := Cat(count(0), !count(1)) }
+  when(deq.fire())(count := Cat(count(0), !count(1)))
 
   // Ensure the clocking is setup correctly
   direction match {
     case Symmetric  => () // always safe
     case Flexible   => ()
-    case FastToSlow => assert (equal || count(1) =/= enq.source(0))
-    case SlowToFast => assert (equal || count(1) === enq.source(0))
+    case FastToSlow => assert(equal || count(1) =/= enq.source(0))
+    case SlowToFast => assert(equal || count(1) === enq.source(0))
   }
 }
 
-class RationalCrossingFull[T <: Data](gen: T, direction: RationalDirection = Symmetric) extends Module
-{
+class RationalCrossingFull[T <: Data](gen: T, direction: RationalDirection = Symmetric) extends Module {
   val io = IO(new CrossingIO(gen))
 
   val source = Module(new RationalCrossingSource(gen, direction))
@@ -145,15 +140,14 @@ class RationalCrossingFull[T <: Data](gen: T, direction: RationalDirection = Sym
 
   source.clock := io.enq_clock
   source.reset := io.enq_reset
-  sink  .clock := io.deq_clock
-  sink  .reset := io.deq_reset
+  sink.clock := io.deq_clock
+  sink.reset := io.deq_reset
 
   source.io.enq <> io.enq
   io.deq <> sink.io.deq
 }
 
-object ToRational
-{
+object ToRational {
   def apply[T <: Data](x: DecoupledIO[T], direction: RationalDirection = Symmetric): RationalIO[T] = {
     val source = Module(new RationalCrossingSource(chiselTypeOf(x.bits), direction))
     source.io.enq <> x
@@ -161,8 +155,7 @@ object ToRational
   }
 }
 
-object FromRational
-{
+object FromRational {
   def apply[T <: Data](x: RationalIO[T], direction: RationalDirection = Symmetric): DecoupledIO[T] = {
     val sink = Module(new RationalCrossingSink(chiselTypeOf(x.bits0), direction))
     sink.io.enq <> x

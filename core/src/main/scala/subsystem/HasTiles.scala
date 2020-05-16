@@ -43,7 +43,7 @@ trait HasTiles extends HasCoreMonitorBundles { this: BaseSubsystem =>
   val tileCeaseSinkNode = IntSinkNode(IntSinkPortSimple())
   tileCeaseSinkNode := tileCeaseXbarNode
 
-  protected def connectMasterPortsToSBus(tile: BaseTile, crossing: RocketCrossingParams) {
+  protected def connectMasterPortsToSBus(tile: BaseTile, crossing: RocketCrossingParams): Unit = {
     locateTLBusWrapper(crossing.master.where).coupleFrom(tile.tileParams.name.getOrElse("tile")) { bus =>
       (bus :=*
         TLBuffer(crossing.master.buffers) :=*
@@ -54,7 +54,7 @@ trait HasTiles extends HasCoreMonitorBundles { this: BaseSubsystem =>
     }
   }
 
-  protected def connectSlavePortsToCBus(tile: BaseTile, crossing: RocketCrossingParams)(implicit valName: ValName) {
+  protected def connectSlavePortsToCBus(tile: BaseTile, crossing: RocketCrossingParams)(implicit valName: ValName): Unit = {
     DisableMonitors { implicit p =>
       locateTLBusWrapper(crossing.slave.where).coupleTo(tile.tileParams.name.getOrElse("tile")) { bus =>
         crossing.slave.blockerCtrlAddr
@@ -68,7 +68,7 @@ trait HasTiles extends HasCoreMonitorBundles { this: BaseSubsystem =>
     }
   }
 
-  protected def connectInterrupts(tile: BaseTile, debugOpt: Option[TLDebugModule], clintOpt: Option[CLINT], plicOpt: Option[TLPLIC]) {
+  protected def connectInterrupts(tile: BaseTile, debugOpt: Option[TLDebugModule], clintOpt: Option[CLINT], plicOpt: Option[TLPLIC]): Unit = {
     // Handle all the different types of interrupts crossing to or from the tile:
     // NOTE: The order of calls to := matters! They must match how interrupts
     //       are decoded from tile.intInwardNode inside the tile. For this reason,

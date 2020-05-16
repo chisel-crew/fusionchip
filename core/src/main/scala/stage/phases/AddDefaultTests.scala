@@ -2,21 +2,20 @@
 
 package freechips.rocketchip.stage.phases
 
+import scala.collection.mutable
 
 import chipsalliance.rocketchip.config.Parameters
 import chisel3.stage.phases.Elaborate
 import firrtl.AnnotationSeq
 import firrtl.annotations.NoTargetAnnotation
-import firrtl.options.{Dependency, Phase, PreservesAll, Unserializable}
 import firrtl.options.Viewer.view
+import firrtl.options.{ Dependency, Phase, PreservesAll, Unserializable }
 import freechips.rocketchip.stage.RocketChipOptions
 import freechips.rocketchip.subsystem.RocketTilesKey
-import freechips.rocketchip.system.{DefaultTestSuites, RegressionTestSuite, RocketTestSuite, TestGeneration}
+import freechips.rocketchip.system.DefaultTestSuites._
+import freechips.rocketchip.system.{ DefaultTestSuites, RegressionTestSuite, RocketTestSuite, TestGeneration }
 import freechips.rocketchip.tile.XLen
 import freechips.rocketchip.util.HasRocketChipStageUtils
-import freechips.rocketchip.system.DefaultTestSuites._
-
-import scala.collection.mutable
 
 /** Annotation that contains a list of [[RocketTestSuite]]s to run */
 case class RocketTestSuiteAnnotation(tests: Seq[RocketTestSuite]) extends NoTargetAnnotation with Unserializable
@@ -27,16 +26,15 @@ case class RocketTestSuiteAnnotation(tests: Seq[RocketTestSuite]) extends NoTarg
 class AddDefaultTests extends Phase with PreservesAll[Phase] with HasRocketChipStageUtils {
 
   override val prerequisites = Seq(Dependency[Checks], Dependency[Elaborate])
-  override val dependents = Seq(Dependency[GenerateTestSuiteMakefrags])
+  override val dependents    = Seq(Dependency[GenerateTestSuiteMakefrags])
 
-  def GenerateDefaultTestSuites(): List[RocketTestSuite] = {
+  def GenerateDefaultTestSuites(): List[RocketTestSuite] =
     List(DefaultTestSuites.groundtest64("p"), DefaultTestSuites.emptyBmarks, DefaultTestSuites.singleRegression)
-  }
 
   def GenerateSystemTestSuites(annotations: AnnotationSeq): scala.collection.mutable.Buffer[RocketTestSuite] = {
     val params: Parameters = getConfig(view[RocketChipOptions](annotations).configNames.get).toInstance
-    val xlen = params(XLen)
-    val tests = scala.collection.mutable.Buffer[RocketTestSuite]()
+    val xlen               = params(XLen)
+    val tests              = scala.collection.mutable.Buffer[RocketTestSuite]()
 
     val regressionTests = mutable.LinkedHashSet(
       "rv64ud-v-fcvt",
@@ -70,24 +68,26 @@ class AddDefaultTests extends Phase with PreservesAll[Phase] with HasRocketChipS
       "rv32ui-p-lh",
       "rv32uc-p-rvc",
       "rv32mi-p-sbreak",
-      "rv32ui-p-sll")
+      "rv32ui-p-sll"
+    )
 
     // TODO: for now only generate tests for the first core in the first subsystem
     params(RocketTilesKey).headOption.map { tileParams =>
       val coreParams = tileParams.core
-      val vm = coreParams.useVM
-      val env = if (vm) List("p", "v") else List("p")
-      coreParams.fpu foreach { case cfg =>
-        if (xlen == 32) {
-          tests ++= env.map(rv32uf)
-          if (cfg.fLen >= 64)
-            tests ++= env.map(rv32ud)
-        } else {
-          tests += rv32udBenchmarks
-          tests ++= env.map(rv64uf)
-          if (cfg.fLen >= 64)
-            tests ++= env.map(rv64ud)
-        }
+      val vm         = coreParams.useVM
+      val env        = if (vm) List("p", "v") else List("p")
+      coreParams.fpu foreach {
+        case cfg =>
+          if (xlen == 32) {
+            tests ++= env.map(rv32uf)
+            if (cfg.fLen >= 64)
+              tests ++= env.map(rv32ud)
+          } else {
+            tests += rv32udBenchmarks
+            tests ++= env.map(rv64uf)
+            if (cfg.fLen >= 64)
+              tests ++= env.map(rv64ud)
+          }
       }
       if (coreParams.useAtomics) {
         if (tileParams.dcache.flatMap(_.scratch).isEmpty)
@@ -100,27 +100,28 @@ class AddDefaultTests extends Phase with PreservesAll[Phase] with HasRocketChipS
         if (xlen == 64) ((if (vm) rv64i else rv64pi), rv64u)
         else ((if (vm) rv32i else rv32pi), rv32u)
 
-      tests ++= rvi.map(_ ("p"))
-      tests ++= (if (vm) List("v") else List()).flatMap(env => rvu.map(_ (env)))
+      tests ++= rvi.map(_("p"))
+      tests ++= (if (vm) List("v") else List()).flatMap(env => rvu.map(_(env)))
       tests += benchmarks
 
       /* Filter the regression tests based on what the Rocket Chip configuration supports */
       val extensions = {
         val fd = coreParams.fpu.map {
           case cfg if cfg.fLen >= 64 => "fd"
-          case _ => "f"
+          case _                     => "f"
         }
         val m = coreParams.mulDiv.map { case _ => "m" }
-        fd ++ m ++ Seq(if (coreParams.useRVE) Some("e") else Some("i"),
+        fd ++ m ++ Seq(
+          if (coreParams.useRVE) Some("e") else Some("i"),
           if (coreParams.useAtomics) Some("a") else None,
-          if (coreParams.useCompressed) Some("c") else None)
-          .flatten
+          if (coreParams.useCompressed) Some("c") else None
+        ).flatten
           .mkString("")
       }
       val re = s"""^rv$xlen[usm][$extensions].+""".r
       regressionTests.retain {
         case re() => true
-        case _ => false
+        case _    => false
       }
       tests += new RegressionTestSuite(regressionTests)
     }
@@ -131,7 +132,7 @@ class AddDefaultTests extends Phase with PreservesAll[Phase] with HasRocketChipS
     val ropts = view[RocketChipOptions](annotations)
     val tests = ropts.topPackage.get match {
       case "freechips.rocketchip.system" => GenerateSystemTestSuites(annotations)
-      case _ => GenerateDefaultTestSuites()
+      case _                             => GenerateDefaultTestSuites()
     }
 
     RocketTestSuiteAnnotation(tests) +: annotations

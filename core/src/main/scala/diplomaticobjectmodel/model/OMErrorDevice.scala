@@ -2,7 +2,6 @@
 
 package freechips.rocketchip.diplomaticobjectmodel.model
 
-
 case class OMErrorDevice(
   memoryRegions: Seq[OMMemoryRegion],
   interrupts: Seq[OMInterrupt],

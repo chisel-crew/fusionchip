@@ -1,11 +1,12 @@
 // See LICENSE.SiFive for license details.
 package freechips.rocketchip.util
 
-import chisel3._
-import chisel3.util._
-import chisel3.experimental.DataMirror
 import scala.collection.immutable.ListMap
 import scala.collection.mutable.HashMap
+
+import chisel3._
+import chisel3.experimental.DataMirror
+import chisel3.util._
 
 /* BundleMaps include IOs for every BundleField they are constructed with.
  * A given BundleField in a BundleMap is accessed by a BundleKey.
