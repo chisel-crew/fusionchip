@@ -5,6 +5,8 @@ resolvers ++= Seq(
 )
 
 lazy val commonSettings = Seq(
+  organization := "com.neurodyne",
+  version := "0.1.1",
 // Refine scalac params from tpolecat
   scalacOptions --= Seq(
     "-Xfatal-warnings"

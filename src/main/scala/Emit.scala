@@ -16,7 +16,7 @@ object Emit extends App {
   if (!Files.exists(path))
     Files.createDirectory(path)
 
-  val entity = "vlog" // {"soc", "core"}
+  val entity = "soc" // {"soc", "core", "vlog"}
 
   private def runAnnotations(cfg: String, top: String) = Seq(
     new TargetDirAnnotation(dest),
@@ -34,10 +34,10 @@ object Emit extends App {
 
     case "vlog" =>
       println("Running vlog")
-      val stage = new RocketChipStage()
-      val cfg   = new FusionConfig()
-      val ldut  = LazyModule(new FusionSystem()(cfg))
-      val dut   = Module(ldut.module)
+      val stage     = new RocketChipStage()
+      val cfg       = new FusionConfig()
+      lazy val ldut = LazyModule(new FusionSystem()(cfg))
+      lazy val dut  = Module(ldut.module)
 
       println(">>>>>>>>>>")
       stage.emitVerilog(
@@ -51,7 +51,7 @@ object Emit extends App {
     case _ => new RuntimeException("Invalid entity provided")
   }
 
-  emitEntity("soc")
+  emitEntity(entity)
 }
 
 object EEE {
