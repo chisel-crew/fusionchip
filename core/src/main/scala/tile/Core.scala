@@ -45,62 +45,65 @@ trait CoreParams {
   def customCSRs(implicit p: Parameters): CustomCSRs = new CustomCSRs
 
   def hasSupervisorMode: Boolean = useSupervisor || useVM
-  def instBytes: Int = instBits / 8
-  def fetchBytes: Int = fetchWidth * instBytes
+  def instBytes: Int             = instBits / 8
+  def fetchBytes: Int            = fetchWidth * instBytes
   def lrscCycles: Int
 
   def dcacheReqTagBits: Int = 6
 
-  def minFLen: Int = 32
-  def vLen: Int = 0
-  def sLen: Int = 0
+  def minFLen: Int                    = 32
+  def vLen: Int                       = 0
+  def sLen: Int                       = 0
   def eLen(xLen: Int, fLen: Int): Int = xLen max fLen
-  def vMemDataBits: Int = 0
+  def vMemDataBits: Int               = 0
 }
 
 trait HasCoreParameters extends HasTileParameters {
   val coreParams: CoreParams = tileParams.core
 
   val minFLen = coreParams.fpu.map(_ => coreParams.minFLen).getOrElse(0)
-  val fLen = coreParams.fpu.map(_.fLen).getOrElse(0)
+  val fLen    = coreParams.fpu.map(_.fLen).getOrElse(0)
 
-  val usingMulDiv = coreParams.mulDiv.nonEmpty
-  val usingFPU = coreParams.fpu.nonEmpty
-  val usingAtomics = coreParams.useAtomics
+  val usingMulDiv           = coreParams.mulDiv.nonEmpty
+  val usingFPU              = coreParams.fpu.nonEmpty
+  val usingAtomics          = coreParams.useAtomics
   val usingAtomicsOnlyForIO = coreParams.useAtomicsOnlyForIO
-  val usingAtomicsInCache = usingAtomics && !usingAtomicsOnlyForIO
-  val usingCompressed = coreParams.useCompressed
-  val usingVector = coreParams.useVector
-  val usingSCIE = coreParams.useSCIE
+  val usingAtomicsInCache   = usingAtomics && !usingAtomicsOnlyForIO
+  val usingCompressed       = coreParams.useCompressed
+  val usingVector           = coreParams.useVector
+  val usingSCIE             = coreParams.useSCIE
 
   val retireWidth = coreParams.retireWidth
-  val fetchWidth = coreParams.fetchWidth
+  val fetchWidth  = coreParams.fetchWidth
   val decodeWidth = coreParams.decodeWidth
 
-  val fetchBytes = coreParams.fetchBytes
-  val coreInstBits = coreParams.instBits
-  val coreInstBytes = coreInstBits/8
-  val coreDataBits = xLen max fLen max vMemDataBits
-  val coreDataBytes = coreDataBits/8
+  val fetchBytes      = coreParams.fetchBytes
+  val coreInstBits    = coreParams.instBits
+  val coreInstBytes   = coreInstBits / 8
+  val coreDataBits    = xLen max fLen max vMemDataBits
+  val coreDataBytes   = coreDataBits / 8
   def coreMaxAddrBits = paddrBits max vaddrBitsExtended
 
-  val nBreakpoints = coreParams.nBreakpoints
-  val nPMPs = coreParams.nPMPs
+  val nBreakpoints   = coreParams.nBreakpoints
+  val nPMPs          = coreParams.nPMPs
   val pmpGranularity = coreParams.pmpGranularity
-  val nPerfCounters = coreParams.nPerfCounters
-  val mtvecInit = coreParams.mtvecInit
-  val mtvecWritable = coreParams.mtvecWritable
+  val nPerfCounters  = coreParams.nPerfCounters
+  val mtvecInit      = coreParams.mtvecInit
+  val mtvecWritable  = coreParams.mtvecWritable
 
-  def vLen = coreParams.vLen
-  def sLen = coreParams.sLen
-  def eLen = coreParams.eLen(xLen, fLen)
+  def vLen         = coreParams.vLen
+  def sLen         = coreParams.sLen
+  def eLen         = coreParams.eLen(xLen, fLen)
   def vMemDataBits = if (usingVector) coreParams.vMemDataBits else 0
-  def maxVLMax = vLen
+  def maxVLMax     = vLen
 
   if (usingVector) {
     require(isPow2(vLen), s"vLen ($vLen) must be a power of 2")
     require(eLen >= 32 && vLen % eLen == 0, s"eLen must divide vLen ($vLen) and be no less than 32")
-    require(vMemDataBits >= eLen && vLen % vMemDataBits == 0, s"vMemDataBits ($vMemDataBits) must divide vLen ($vLen) and be no less than eLen ($eLen)")
+    require(
+      vMemDataBits >= eLen && vLen % vMemDataBits == 0,
+      s"vMemDataBits ($vMemDataBits) must divide vLen ($vLen) and be no less than eLen ($eLen)"
+    )
   }
 
   // Print out log of committed instructions and their writeback values.
@@ -109,11 +112,9 @@ trait HasCoreParameters extends HasTileParameters {
 
 }
 
-abstract class CoreModule(implicit val p: Parameters) extends Module
-  with HasCoreParameters
+abstract class CoreModule(implicit val p: Parameters) extends Module with HasCoreParameters
 
-abstract class CoreBundle(implicit val p: Parameters) extends ParameterizedBundle()(p)
-  with HasCoreParameters
+abstract class CoreBundle(implicit val p: Parameters) extends ParameterizedBundle()(p) with HasCoreParameters
 
 class CoreInterrupts(implicit p: Parameters) extends TileInterrupts()(p) {
   val buserror = tileParams.beuAddr.map(a => Bool())
@@ -123,15 +124,15 @@ trait HasCoreIO extends HasTileParameters {
   implicit val p: Parameters
   val io = new CoreBundle()(p) with HasExternallyDrivenTileConstants {
     val interrupts = new CoreInterrupts().asInput
-    val imem  = new FrontendIO
-    val dmem = new HellaCacheIO
-    val ptw = new DatapathPTWIO().flip
-    val fpu = new FPUCoreIO().flip
-    val rocc = new RoCCCoreIO().flip
-    val trace = Vec(coreParams.retireWidth, new TracedInstruction).asOutput
-    val bpwatch = Vec(coreParams.nBreakpoints, new BPWatch(coreParams.retireWidth)).asOutput
-    val cease = Bool().asOutput
-    val wfi = Bool().asOutput
+    val imem       = new FrontendIO
+    val dmem       = new HellaCacheIO
+    val ptw        = new DatapathPTWIO().flip
+    val fpu        = new FPUCoreIO().flip
+    val rocc       = new RoCCCoreIO().flip
+    val trace      = Vec(coreParams.retireWidth, new TracedInstruction).asOutput
+    val bpwatch    = Vec(coreParams.nBreakpoints, new BPWatch(coreParams.retireWidth)).asOutput
+    val cease      = Bool().asOutput
+    val wfi        = Bool().asOutput
     val traceStall = Bool().asInput
   }
 }

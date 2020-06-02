@@ -3,10 +3,8 @@ package sifive.blocks.devices.chiplink
 
 import Chisel._
 import freechips.rocketchip.tilelink._
-import freechips.rocketchip.util._
 
-class SourceE(info: ChipLinkInfo) extends Module
-{
+class SourceE(info: ChipLinkInfo) extends Module {
   val io = new Bundle {
     val e = Decoupled(new TLBundleE(info.edgeOut.bundle))
     val q = Decoupled(UInt(width = info.params.dataBits)).flip

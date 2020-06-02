@@ -2,7 +2,7 @@
 package sifive.blocks.devices.gpio
 
 import Chisel._
-import sifive.blocks.devices.pinctrl.{PinCtrl, Pin, BasePin, EnhancedPin, EnhancedPinCtrl}
+import sifive.blocks.devices.pinctrl.{ BasePin, Pin, PinCtrl }
 
 // This is the actual IOF interface.pa
 // Add a valid bit to indicate whether
@@ -17,9 +17,9 @@ object IOFCtrl {
   def apply(): IOFCtrl = {
     val iof = Wire(new IOFCtrl())
     iof.valid := Bool(false)
-    iof.oval  := Bool(false)
-    iof.oe    := Bool(false)
-    iof.ie    := Bool(false)
+    iof.oval := Bool(false)
+    iof.oe := Bool(false)
+    iof.ie := Bool(false)
     iof
   }
 }
@@ -27,29 +27,30 @@ object IOFCtrl {
 // Package up the inputs and outputs
 // for the IOF
 class IOFPin extends Pin {
-  val o  = new IOFCtrl().asOutput
+  val o = new IOFCtrl().asOutput
 
   def default(): Unit = {
-    this.o.oval  := Bool(false)
-    this.o.oe    := Bool(false)
-    this.o.ie    := Bool(false)
+    this.o.oval := Bool(false)
+    this.o.oe := Bool(false)
+    this.o.ie := Bool(false)
     this.o.valid := Bool(false)
   }
 
-  def inputPin(pue: Bool = Bool(false) /*ignored*/): Bool = {
+  def inputPin(pue: Bool = Bool(false) /*ignored*/ ): Bool = {
     this.o.oval := Bool(false)
-    this.o.oe   := Bool(false)
-    this.o.ie   := Bool(true)
+    this.o.oe := Bool(false)
+    this.o.ie := Bool(true)
     this.i.ival
   }
-  def outputPin(signal: Bool,
+  def outputPin(
+    signal: Bool,
     pue: Bool = Bool(false), /*ignored*/
     ds: Bool = Bool(false), /*ignored*/
     ie: Bool = Bool(false)
   ): Unit = {
     this.o.oval := signal
-    this.o.oe   := Bool(true)
-    this.o.ie   := ie
+    this.o.oe := Bool(true)
+    this.o.ie := ie
   }
 }
 
@@ -61,4 +62,3 @@ object BasePinToIOF {
     iof.o.valid := Bool(true)
   }
 }
-

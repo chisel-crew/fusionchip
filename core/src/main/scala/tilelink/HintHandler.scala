@@ -12,9 +12,7 @@ import freechips.rocketchip.devices.tilelink.TLROM
 class TLHintHandler(passthrough: Boolean = true)(implicit p: Parameters) extends LazyModule {
   val node = TLAdapterNode(
     clientFn = { cp =>
-      cp.v1copy(clients =
-        cp.clients.map(c => c.v1copy(sourceId = IdRange(c.sourceId.start * 2, c.sourceId.end * 2)))
-      )
+      cp.v1copy(clients = cp.clients.map(c => c.v1copy(sourceId = IdRange(c.sourceId.start * 2, c.sourceId.end * 2))))
     },
     managerFn = { mp =>
       mp.v1copy(managers = mp.managers.map { m =>

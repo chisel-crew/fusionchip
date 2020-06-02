@@ -2,21 +2,19 @@
 package sifive.blocks.devices.chiplink
 
 import Chisel._
-import freechips.rocketchip.tilelink._
 import freechips.rocketchip.util._
 
-class RX(info: ChipLinkInfo) extends Module
-{
+class RX(info: ChipLinkInfo) extends Module {
   val io = new Bundle {
     val b2c_send = Bool(INPUT)
     val b2c_data = UInt(INPUT, info.params.dataBits)
-    val a = new AsyncBundle(UInt(width = info.params.dataBits), info.params.crossing)
-    val b = new AsyncBundle(UInt(width = info.params.dataBits), info.params.crossing)
-    val c = new AsyncBundle(UInt(width = info.params.dataBits), info.params.crossing)
-    val d = new AsyncBundle(UInt(width = info.params.dataBits), info.params.crossing)
-    val e = new AsyncBundle(UInt(width = info.params.dataBits), info.params.crossing)
-    val rxc = new AsyncBundle(new CreditBump(info.params), AsyncQueueParams.singleton())
-    val txc = new AsyncBundle(new CreditBump(info.params), AsyncQueueParams.singleton())
+    val a        = new AsyncBundle(UInt(width = info.params.dataBits), info.params.crossing)
+    val b        = new AsyncBundle(UInt(width = info.params.dataBits), info.params.crossing)
+    val c        = new AsyncBundle(UInt(width = info.params.dataBits), info.params.crossing)
+    val d        = new AsyncBundle(UInt(width = info.params.dataBits), info.params.crossing)
+    val e        = new AsyncBundle(UInt(width = info.params.dataBits), info.params.crossing)
+    val rxc      = new AsyncBundle(new CreditBump(info.params), AsyncQueueParams.singleton())
+    val txc      = new AsyncBundle(new CreditBump(info.params), AsyncQueueParams.singleton())
   }
 
   // Immediately register our input data
@@ -26,16 +24,16 @@ class RX(info: ChipLinkInfo) extends Module
 
   // Fit b2c into the firstlast API
   val beat = Wire(Decoupled(UInt(width = info.params.dataBits)))
-  beat.bits  := b2c_data
+  beat.bits := b2c_data
   beat.valid := b2c_send
   beat.ready := Bool(true)
 
   // Select the correct HellaQueue for the request
-  val (first, _) = info.firstlast(beat)
+  val (first, _)  = info.firstlast(beat)
   val formatBits  = beat.bits(2, 0)
   val formatValid = beat.fire() && first
-  val format = Mux(formatValid, formatBits, RegEnable(formatBits, formatValid))
-  val formatOH = UIntToOH(format)
+  val format      = Mux(formatValid, formatBits, RegEnable(formatBits, formatValid))
+  val formatOH    = UIntToOH(format)
 
   // Create the receiver buffers
   val hqa = Module(new HellaQueue(info.params.Qdepth)(beat.bits))
@@ -49,15 +47,17 @@ class RX(info: ChipLinkInfo) extends Module
   private def ioX = Seq(io.a, io.b, io.c, io.d, io.e)
 
   // Enqueue to the HellaQueues
-  (formatOH.asBools zip hqX) foreach { case (sel, hq) =>
-    hq.io.enq.valid := beat.valid && sel
-    hq.io.enq.bits := beat.bits
-    assert (!hq.io.enq.valid || hq.io.enq.ready) // overrun impossible
+  (formatOH.asBools zip hqX) foreach {
+    case (sel, hq) =>
+      hq.io.enq.valid := beat.valid && sel
+      hq.io.enq.bits := beat.bits
+      assert(!hq.io.enq.valid || hq.io.enq.ready) // overrun impossible
   }
 
   // Send HellaQueue output to their respective FSMs
-  (hqX zip ioX) foreach { case (hq, io) =>
-    io <> ToAsyncBundle(hq.io.deq, info.params.crossing)
+  (hqX zip ioX) foreach {
+    case (hq, io) =>
+      io <> ToAsyncBundle(hq.io.deq, info.params.crossing)
   }
 
   // Credits we need to hand-off to the TX FSM
@@ -76,8 +76,9 @@ class RX(info: ChipLinkInfo) extends Module
 
   // Generate new RX credits as the HellaQueues drain
   val rxInc = Wire(new CreditBump(info.params))
-  (hqX zip rxInc.X) foreach { case (hq, inc) =>
-    inc := hq.io.deq.fire().asUInt
+  (hqX zip rxInc.X) foreach {
+    case (hq, inc) =>
+      inc := hq.io.deq.fire().asUInt
   }
 
   // Generate new TX credits as we receive F-format messages
@@ -86,6 +87,6 @@ class RX(info: ChipLinkInfo) extends Module
   // As we hand-over credits, reset the counters
   tx := tx + txInc
   rx := rx + rxInc
-  when (txOut.fire()) { tx := txInc }
-  when (rxOut.fire()) { rx := rxInc }
+  when(txOut.fire())(tx := txInc)
+  when(rxOut.fire())(rx := rxInc)
 }

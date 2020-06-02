@@ -7,11 +7,10 @@ import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.regmapper._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.interrupts._
-import freechips.rocketchip.subsystem._
-import freechips.rocketchip.util.HeterogeneousBag
-import sifive.blocks.util.{NonBlockingEnqueue, NonBlockingDequeue}
-import freechips.rocketchip.diplomaticobjectmodel.model.{OMComponent, OMRegister}
-import freechips.rocketchip.diplomaticobjectmodel.logicaltree.{LogicalModuleTree, LogicalTreeNode}
+
+import sifive.blocks.util.{ NonBlockingDequeue, NonBlockingEnqueue }
+import freechips.rocketchip.diplomaticobjectmodel.model.{ OMComponent, OMRegister }
+import freechips.rocketchip.diplomaticobjectmodel.logicaltree.{ LogicalTreeNode }
 import freechips.rocketchip.diplomaticobjectmodel.DiplomaticObjectModelAddressing
 import sifive.blocks.util._
 
@@ -26,11 +25,11 @@ trait SPIParamsBase {
   val divisorBits: Int
   val fineDelayBits: Int
   val sampleDelayBits: Int
-  val defaultSampleDel:Int
+  val defaultSampleDel: Int
 
-  lazy val csIdBits = log2Up(csWidth)
+  lazy val csIdBits   = log2Up(csWidth)
   lazy val lengthBits = log2Floor(frameBits) + 1
-  lazy val countBits = math.max(lengthBits, delayBits)
+  lazy val countBits  = math.max(lengthBits, delayBits)
 
   lazy val txDepthBits = log2Floor(txDepth) + 1
   lazy val rxDepthBits = log2Floor(rxDepth) + 1
@@ -38,19 +37,19 @@ trait SPIParamsBase {
 }
 
 case class SPIParams(
-    rAddress: BigInt,
-    rSize: BigInt = 0x1000,
-    rxDepth: Int = 8,
-    txDepth: Int = 8,
-    csWidth: Int = 1,
-    frameBits: Int = 8,
-    delayBits: Int = 8,
-    divisorBits: Int = 12,
-    fineDelayBits: Int = 0,
-    sampleDelayBits: Int = 5,
-    defaultSampleDel: Int = 3
-    )
-  extends SPIParamsBase with DeviceParams {
+  rAddress: BigInt,
+  rSize: BigInt = 0x1000,
+  rxDepth: Int = 8,
+  txDepth: Int = 8,
+  csWidth: Int = 1,
+  frameBits: Int = 8,
+  delayBits: Int = 8,
+  divisorBits: Int = 12,
+  fineDelayBits: Int = 0,
+  sampleDelayBits: Int = 5,
+  defaultSampleDel: Int = 3
+) extends SPIParamsBase
+    with DeviceParams {
 
   require(frameBits >= 4)
   require((fineDelayBits == 0) | (fineDelayBits == 5), s"Require fine delay bits to be 0 or 5 and not $fineDelayBits")
@@ -58,12 +57,11 @@ case class SPIParams(
   require(defaultSampleDel >= 0)
 }
 
-class SPITopModule(c: SPIParamsBase, outer: TLSPIBase)
-    extends LazyModuleImp(outer) {
+class SPITopModule(c: SPIParamsBase, outer: TLSPIBase) extends LazyModuleImp(outer) {
 
   val ctrl = Reg(init = SPIControl.init(c))
   val fifo = Module(new SPIFIFO(c))
-  val mac = Module(new SPIMedia(c))
+  val mac  = Module(new SPIMedia(c))
 
   outer.port <> mac.io.port
   fifo.io.ctrl.fmt := ctrl.fmt
@@ -80,67 +78,134 @@ class SPITopModule(c: SPIParamsBase, outer: TLSPIBase)
   outer.interrupts(0) := (ip.txwm && ie.txwm) || (ip.rxwm && ie.rxwm)
 
   val regmapBase = Seq(
-    SPICRs.sckdiv -> Seq(RegField(c.divisorBits, ctrl.sck.div,
-                         RegFieldDesc("sckdiv", "Serial clock divisor", reset=Some(3)))),
-    SPICRs.sckmode ->  RegFieldGroup("sckmode", Some("Serial clock mode"), Seq(
-      RegField(1, ctrl.sck.pha,
-               RegFieldDesc("sckmode_pha", "Serial clock phase", reset=Some(0))),
-      RegField(1, ctrl.sck.pol,
-               RegFieldDesc("sckmode_pol", "Serial clock polarity", reset=Some(0))))),
-    SPICRs.csid -> Seq(RegField(c.csIdBits, ctrl.cs.id,
-                       RegFieldDesc("csid", "Chip select id", reset=Some(0)))),
-    SPICRs.csdef -> ctrl.cs.dflt.map(x => RegField(1, x,
-                    RegFieldDesc("csdef", "Chip select default", group = Some("csdef"), groupDesc = Some("Chip select default"), reset=Some(1)))),
-    SPICRs.csmode -> Seq(RegField(SPICSMode.width, ctrl.cs.mode,
-                         RegFieldDesc("csmode", "Chip select mode", reset=Some(SPICSMode.Auto.litValue())))),
-    SPICRs.dcssck -> Seq(RegField(c.delayBits, ctrl.dla.cssck,
-                         RegFieldDesc("cssck", "CS to SCK delay", reset=Some(1)))),
-    SPICRs.dsckcs -> Seq(RegField(c.delayBits, ctrl.dla.sckcs,
-                         RegFieldDesc("sckcs", "SCK to CS delay", reset=Some(1)))),
-    SPICRs.dintercs -> Seq(RegField(c.delayBits, ctrl.dla.intercs,
-                           RegFieldDesc("intercs", "Minimum CS inactive time", reset=Some(1)))),
-    SPICRs.dinterxfr -> Seq(RegField(c.delayBits, ctrl.dla.interxfr,
-                            RegFieldDesc("interxfr", "Minimum interframe delay", reset=Some(0)))),
-
-    SPICRs.fmt -> RegFieldGroup("fmt",Some("Serial frame format"),Seq(
-      RegField(SPIProtocol.width, ctrl.fmt.proto,
-               RegFieldDesc("proto","SPI Protocol", reset=Some(SPIProtocol.Single.litValue()))),
-      RegField(SPIEndian.width, ctrl.fmt.endian,
-               RegFieldDesc("endian","SPI Endianness", reset=Some(SPIEndian.MSB.litValue()))),
-      RegField(SPIDirection.width, ctrl.fmt.iodir,
-               RegFieldDesc("iodir","SPI I/O Direction", reset=Some(SPIDirection.Rx.litValue()))))),
-    SPICRs.len -> Seq(RegField(c.lengthBits, ctrl.fmt.len,
-                      RegFieldDesc("len","Number of bits per frame", reset=Some(math.min(c.frameBits, 8))))),
-
-    SPICRs.txfifo -> RegFieldGroup("txdata",Some("Transmit data"),
-                     NonBlockingEnqueue(fifo.io.tx)),
-    SPICRs.rxfifo -> RegFieldGroup("rxdata",Some("Receive data"),
-                     NonBlockingDequeue(fifo.io.rx)),
-
-    SPICRs.txmark -> Seq(RegField(c.txDepthBits, ctrl.wm.tx,
-                         RegFieldDesc("txmark","Transmit watermark", reset=Some(0)))),
-    SPICRs.rxmark -> Seq(RegField(c.rxDepthBits, ctrl.wm.rx,
-                         RegFieldDesc("rxmark","Receive watermark", reset=Some(0)))),
-    SPICRs.ie -> RegFieldGroup("ie",Some("SPI interrupt enable"),Seq(
-      RegField(1, ie.txwm,
-      RegFieldDesc("txwm_ie","Transmit watermark interrupt enable", reset=Some(0))),
-      RegField(1, ie.rxwm,
-      RegFieldDesc("rxwm_ie","Receive watermark interrupt enable", reset=Some(0))))),
-    SPICRs.ip -> RegFieldGroup("ip",Some("SPI interrupt pending"),Seq(
-      RegField.r(1, ip.txwm,
-      RegFieldDesc("txwm_ip","Transmit watermark interrupt pending", volatile=true)),
-      RegField.r(1, ip.rxwm,
-      RegFieldDesc("rxwm_ip","Receive watermark interrupt pending", volatile=true)))),
-
-    SPICRs.extradel -> RegFieldGroup("extradel",Some("delay from the sck edge"),Seq(
-      RegField(c.divisorBits, ctrl.extradel.coarse,
-      RegFieldDesc("extradel_coarse","Coarse grain sample delay", reset=Some(0))),
-      RegField(c.fineDelayBits, ctrl.extradel.fine,
-      RegFieldDesc("extradel_fine","Fine grain sample delay", reset=Some(0))))),
-
-    SPICRs.sampledel -> RegFieldGroup("sampledel",Some("Number of delay stages from slave to SPI controller"),Seq(
-      RegField(c.sampleDelayBits, ctrl.sampledel.sd,
-      RegFieldDesc("sampledel_sd","Number of delay stages from slave to the SPI controller", reset=Some(c.defaultSampleDel))))))
+    SPICRs.sckdiv -> Seq(
+      RegField(c.divisorBits, ctrl.sck.div, RegFieldDesc("sckdiv", "Serial clock divisor", reset = Some(3)))
+    ),
+    SPICRs.sckmode -> RegFieldGroup(
+      "sckmode",
+      Some("Serial clock mode"),
+      Seq(
+        RegField(1, ctrl.sck.pha, RegFieldDesc("sckmode_pha", "Serial clock phase", reset = Some(0))),
+        RegField(1, ctrl.sck.pol, RegFieldDesc("sckmode_pol", "Serial clock polarity", reset = Some(0)))
+      )
+    ),
+    SPICRs.csid -> Seq(RegField(c.csIdBits, ctrl.cs.id, RegFieldDesc("csid", "Chip select id", reset = Some(0)))),
+    SPICRs.csdef -> ctrl.cs.dflt.map(x =>
+      RegField(
+        1,
+        x,
+        RegFieldDesc(
+          "csdef",
+          "Chip select default",
+          group = Some("csdef"),
+          groupDesc = Some("Chip select default"),
+          reset = Some(1)
+        )
+      )
+    ),
+    SPICRs.csmode -> Seq(
+      RegField(
+        SPICSMode.width,
+        ctrl.cs.mode,
+        RegFieldDesc("csmode", "Chip select mode", reset = Some(SPICSMode.Auto.litValue()))
+      )
+    ),
+    SPICRs.dcssck -> Seq(
+      RegField(c.delayBits, ctrl.dla.cssck, RegFieldDesc("cssck", "CS to SCK delay", reset = Some(1)))
+    ),
+    SPICRs.dsckcs -> Seq(
+      RegField(c.delayBits, ctrl.dla.sckcs, RegFieldDesc("sckcs", "SCK to CS delay", reset = Some(1)))
+    ),
+    SPICRs.dintercs -> Seq(
+      RegField(c.delayBits, ctrl.dla.intercs, RegFieldDesc("intercs", "Minimum CS inactive time", reset = Some(1)))
+    ),
+    SPICRs.dinterxfr -> Seq(
+      RegField(c.delayBits, ctrl.dla.interxfr, RegFieldDesc("interxfr", "Minimum interframe delay", reset = Some(0)))
+    ),
+    SPICRs.fmt -> RegFieldGroup(
+      "fmt",
+      Some("Serial frame format"),
+      Seq(
+        RegField(
+          SPIProtocol.width,
+          ctrl.fmt.proto,
+          RegFieldDesc("proto", "SPI Protocol", reset = Some(SPIProtocol.Single.litValue()))
+        ),
+        RegField(
+          SPIEndian.width,
+          ctrl.fmt.endian,
+          RegFieldDesc("endian", "SPI Endianness", reset = Some(SPIEndian.MSB.litValue()))
+        ),
+        RegField(
+          SPIDirection.width,
+          ctrl.fmt.iodir,
+          RegFieldDesc("iodir", "SPI I/O Direction", reset = Some(SPIDirection.Rx.litValue()))
+        )
+      )
+    ),
+    SPICRs.len -> Seq(
+      RegField(
+        c.lengthBits,
+        ctrl.fmt.len,
+        RegFieldDesc("len", "Number of bits per frame", reset = Some(math.min(c.frameBits, 8)))
+      )
+    ),
+    SPICRs.txfifo -> RegFieldGroup("txdata", Some("Transmit data"), NonBlockingEnqueue(fifo.io.tx)),
+    SPICRs.rxfifo -> RegFieldGroup("rxdata", Some("Receive data"), NonBlockingDequeue(fifo.io.rx)),
+    SPICRs.txmark -> Seq(
+      RegField(c.txDepthBits, ctrl.wm.tx, RegFieldDesc("txmark", "Transmit watermark", reset = Some(0)))
+    ),
+    SPICRs.rxmark -> Seq(
+      RegField(c.rxDepthBits, ctrl.wm.rx, RegFieldDesc("rxmark", "Receive watermark", reset = Some(0)))
+    ),
+    SPICRs.ie -> RegFieldGroup(
+      "ie",
+      Some("SPI interrupt enable"),
+      Seq(
+        RegField(1, ie.txwm, RegFieldDesc("txwm_ie", "Transmit watermark interrupt enable", reset = Some(0))),
+        RegField(1, ie.rxwm, RegFieldDesc("rxwm_ie", "Receive watermark interrupt enable", reset = Some(0)))
+      )
+    ),
+    SPICRs.ip -> RegFieldGroup(
+      "ip",
+      Some("SPI interrupt pending"),
+      Seq(
+        RegField.r(1, ip.txwm, RegFieldDesc("txwm_ip", "Transmit watermark interrupt pending", volatile = true)),
+        RegField.r(1, ip.rxwm, RegFieldDesc("rxwm_ip", "Receive watermark interrupt pending", volatile = true))
+      )
+    ),
+    SPICRs.extradel -> RegFieldGroup(
+      "extradel",
+      Some("delay from the sck edge"),
+      Seq(
+        RegField(
+          c.divisorBits,
+          ctrl.extradel.coarse,
+          RegFieldDesc("extradel_coarse", "Coarse grain sample delay", reset = Some(0))
+        ),
+        RegField(
+          c.fineDelayBits,
+          ctrl.extradel.fine,
+          RegFieldDesc("extradel_fine", "Fine grain sample delay", reset = Some(0))
+        )
+      )
+    ),
+    SPICRs.sampledel -> RegFieldGroup(
+      "sampledel",
+      Some("Number of delay stages from slave to SPI controller"),
+      Seq(
+        RegField(
+          c.sampleDelayBits,
+          ctrl.sampledel.sd,
+          RegFieldDesc(
+            "sampledel_sd",
+            "Number of delay stages from slave to the SPI controller",
+            reset = Some(c.defaultSampleDel)
+          )
+        )
+      )
+    )
+  )
 
 }
 
@@ -151,13 +216,15 @@ class MMCDevice(spi: Device, maxMHz: Double = 20) extends SimpleDevice("mmc", Se
     val extra = Map(
       "voltage-ranges"    -> Seq(ResourceInt(3300), ResourceInt(3300)),
       "disable-wp"        -> Nil,
-      "spi-max-frequency" -> Seq(ResourceInt(maxMHz * 1000000)))
+      "spi-max-frequency" -> Seq(ResourceInt(maxMHz * 1000000))
+    )
     Description(name, mapping ++ extra)
   }
 }
 
-class FlashDevice(spi: Device, bits: Int = 4, maxMHz: Double = 50, compat: Seq[String] = Nil) extends SimpleDevice("flash", compat :+ "jedec,spi-nor") {
-  require (bits == 1 || bits == 2 || bits == 4)
+class FlashDevice(spi: Device, bits: Int = 4, maxMHz: Double = 50, compat: Seq[String] = Nil)
+    extends SimpleDevice("flash", compat :+ "jedec,spi-nor") {
+  require(bits == 1 || bits == 2 || bits == 4)
   override def parent = Some(spi)
   override def describe(resources: ResourceBindings): Description = {
     val Description(name, mapping) = super.describe(resources)
@@ -165,38 +232,34 @@ class FlashDevice(spi: Device, bits: Int = 4, maxMHz: Double = 50, compat: Seq[S
       "m25p,fast-read"    -> Nil,
       "spi-tx-bus-width"  -> Seq(ResourceInt(bits)),
       "spi-rx-bus-width"  -> Seq(ResourceInt(bits)),
-      "spi-max-frequency" -> Seq(ResourceInt(maxMHz * 1000000)))
+      "spi-max-frequency" -> Seq(ResourceInt(maxMHz * 1000000))
+    )
     Description(name, mapping ++ extra)
   }
 }
 
-abstract class TLSPIBase(w: Int, c: SPIParamsBase)(implicit p: Parameters) extends IORegisterRouter(
-      RegisterRouterParams(
-        name = "spi",
-        compat = Seq("sifive,spi0"),
-        base = c.rAddress,
-        size = c.rSize,
-        beatBytes = w),
-      new SPIPortIO(c))
+abstract class TLSPIBase(w: Int, c: SPIParamsBase)(implicit p: Parameters)
+    extends IORegisterRouter(
+      RegisterRouterParams(name = "spi", compat = Seq("sifive,spi0"), base = c.rAddress, size = c.rSize, beatBytes = w),
+      new SPIPortIO(c)
+    )
     with HasInterruptSources {
   require(isPow2(c.rSize))
-  override def extraResources(resources: ResourceBindings) = Map(
-        "#address-cells" -> Seq(ResourceInt(1)),
-        "#size-cells" -> Seq(ResourceInt(0)))
+  override def extraResources(resources: ResourceBindings) =
+    Map("#address-cells" -> Seq(ResourceInt(1)), "#size-cells" -> Seq(ResourceInt(0)))
   override def nInterrupts = 1
 }
 
-class TLSPI(w: Int, c: SPIParams)(implicit p: Parameters)
-    extends TLSPIBase(w,c)(p) with HasTLControlRegMap {
+class TLSPI(w: Int, c: SPIParams)(implicit p: Parameters) extends TLSPIBase(w, c)(p) with HasTLControlRegMap {
   lazy val module = new SPITopModule(c, this) {
     mac.io.link <> fifo.io.link
     val mapping = (regmapBase)
-    regmap(mapping:_*)
-    val omRegMap = OMRegister.convert(mapping:_*)
+    regmap(mapping: _*)
+    val omRegMap = OMRegister.convert(mapping: _*)
   }
 
   val logicalTreeNode = new LogicalTreeNode(() => Some(device)) {
-    def getOMComponents(resourceBindings: ResourceBindings, children: Seq[OMComponent] = Nil): Seq[OMComponent] = {
+    def getOMComponents(resourceBindings: ResourceBindings, children: Seq[OMComponent] = Nil): Seq[OMComponent] =
       Seq(
         OMSPI(
           rxDepth = c.rxDepth,
@@ -209,12 +272,12 @@ class TLSPI(w: Int, c: SPIParams)(implicit p: Parameters)
           fineDelayBits = c.fineDelayBits,
           sampleDelayBits = c.sampleDelayBits,
           defaultSampleDelay = c.defaultSampleDel,
-          memoryRegions = DiplomaticObjectModelAddressing.getOMMemoryRegions("SPI", resourceBindings, Some(module.omRegMap)),
-          interrupts = DiplomaticObjectModelAddressing.describeGlobalInterrupts(device.describe(resourceBindings).name, resourceBindings)
+          memoryRegions =
+            DiplomaticObjectModelAddressing.getOMMemoryRegions("SPI", resourceBindings, Some(module.omRegMap)),
+          interrupts = DiplomaticObjectModelAddressing
+            .describeGlobalInterrupts(device.describe(resourceBindings).name, resourceBindings)
         )
       )
-    }
   }
-
 
 }

@@ -72,7 +72,8 @@ package object diplomacy {
     InwardNodeHandle[BundleBridgeParams[T], BundleBridgeNull, BundleBridgeParams[T], T]
   type BundleBridgeOutwardNode[T <: Data] =
     OutwardNodeHandle[BundleBridgeParams[T], BundleBridgeNull, BundleBridgeParams[T], T]
-  type BundleBridgeNode[T <: Data] = NodeHandle[BundleBridgeParams[T], BundleBridgeNull, BundleBridgeParams[T], T, BundleBridgeParams[
-    T
-  ], BundleBridgeNull, BundleBridgeParams[T], T]
+  type BundleBridgeNode[T <: Data] =
+    NodeHandle[BundleBridgeParams[T], BundleBridgeNull, BundleBridgeParams[T], T, BundleBridgeParams[
+      T
+    ], BundleBridgeNull, BundleBridgeParams[T], T]
 }
