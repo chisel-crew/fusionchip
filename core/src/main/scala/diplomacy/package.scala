@@ -2,11 +2,10 @@
 
 package freechips.rocketchip
 
-import scala.language.implicitConversions
-
+import chisel3.internal.sourceinfo.{ SourceInfo, SourceLine }
 import chisel3.Data
-import chisel3.internal.sourceinfo.{ SourceInfo, SourceLine, UnlocatableSourceInfo }
 import freechips.rocketchip.config.Parameters
+import scala.language.implicitConversions
 
 package object diplomacy {
   type SimpleNodeHandle[D, U, E, B <: Chisel.Data] = NodeHandle[D, U, E, B, D, U, E, B]
@@ -73,8 +72,7 @@ package object diplomacy {
     InwardNodeHandle[BundleBridgeParams[T], BundleBridgeNull, BundleBridgeParams[T], T]
   type BundleBridgeOutwardNode[T <: Data] =
     OutwardNodeHandle[BundleBridgeParams[T], BundleBridgeNull, BundleBridgeParams[T], T]
-  type BundleBridgeNode[T <: Data] =
-    NodeHandle[BundleBridgeParams[T], BundleBridgeNull, BundleBridgeParams[T], T, BundleBridgeParams[
-      T
-    ], BundleBridgeNull, BundleBridgeParams[T], T]
+  type BundleBridgeNode[T <: Data] = NodeHandle[BundleBridgeParams[T], BundleBridgeNull, BundleBridgeParams[T], T, BundleBridgeParams[
+    T
+  ], BundleBridgeNull, BundleBridgeParams[T], T]
 }

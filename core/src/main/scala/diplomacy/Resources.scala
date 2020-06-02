@@ -2,12 +2,10 @@
 
 package freechips.rocketchip.diplomacy
 
+import Chisel.log2Ceil
+
 import scala.collection.immutable.{ListMap, SortedMap}
 import scala.collection.mutable.HashMap
-
-import Chisel.log2Ceil
-import freechips.rocketchip.diplomaticobjectmodel.DiplomaticObjectModelAddressing
-import freechips.rocketchip.diplomaticobjectmodel.model._
 
 sealed trait ResourceValue
 

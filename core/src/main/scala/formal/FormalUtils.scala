@@ -3,8 +3,8 @@ package freechips.rocketchip.formal
 
 import Chisel._
 import chisel3.{ VecInit }
-import chisel3.internal.sourceinfo.{ SourceInfo, SourceLine }
 import chisel3.util.Cat
+import chisel3.internal.sourceinfo.{ SourceInfo, SourceLine }
 import freechips.rocketchip.config.Field
 
 sealed abstract class MonitorDirection(name: String) {

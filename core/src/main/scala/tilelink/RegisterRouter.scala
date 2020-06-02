@@ -2,17 +2,16 @@
 
 package freechips.rocketchip.tilelink
 
-import scala.math.{ max, min }
-
 import Chisel._
 import chisel3.RawModule
-import firrtl.annotations.ModuleName
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.diplomaticobjectmodel.model.{ OMMemoryRegion, OMRegister, OMRegisterMap }
-import freechips.rocketchip.interrupts._
+import freechips.rocketchip.diplomaticobjectmodel.model.{ OMRegister, OMRegisterMap }
 import freechips.rocketchip.regmapper._
+import freechips.rocketchip.interrupts._
 import freechips.rocketchip.util._
+
+import scala.math.min
 
 class TLRegisterRouterExtraBundle(val sourceBits: Int, val sizeBits: Int) extends Bundle {
   val source = UInt(width = sourceBits max 1)

@@ -2,20 +2,19 @@
 
 package freechips.rocketchip.tilelink
 
-import scala.math.min
-
 import chisel3._
-import chisel3.util._
 import freechips.rocketchip.config.Parameters
-import freechips.rocketchip.devices.tilelink.TLROM
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.util._
+import freechips.rocketchip.devices.tilelink.TLROM
 
 // Acks Hints for managers that don't support them or Acks all Hints if !passthrough
 class TLHintHandler(passthrough: Boolean = true)(implicit p: Parameters) extends LazyModule {
   val node = TLAdapterNode(
     clientFn = { cp =>
-      cp.v1copy(clients = cp.clients.map(c => c.v1copy(sourceId = IdRange(c.sourceId.start * 2, c.sourceId.end * 2))))
+      cp.v1copy(clients =
+        cp.clients.map(c => c.v1copy(sourceId = IdRange(c.sourceId.start * 2, c.sourceId.end * 2)))
+      )
     },
     managerFn = { mp =>
       mp.v1copy(managers = mp.managers.map { m =>

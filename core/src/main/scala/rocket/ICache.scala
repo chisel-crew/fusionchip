@@ -3,20 +3,18 @@
 
 package freechips.rocketchip.rocket
 
-import Chisel.ImplicitConversions._
 import Chisel._
-import chisel3.dontTouch
-import chisel3.internal.sourceinfo.SourceInfo
-import chisel3.util.random.LFSR
+import Chisel.ImplicitConversions._
 import freechips.rocketchip.amba._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.diplomaticobjectmodel.DiplomaticObjectModelAddressing
-import freechips.rocketchip.diplomaticobjectmodel.model._
 import freechips.rocketchip.tile._
 import freechips.rocketchip.tilelink._
-import freechips.rocketchip.util.property._
 import freechips.rocketchip.util.{ DescribedSRAM, _ }
+import freechips.rocketchip.util.property._
+import chisel3.internal.sourceinfo.SourceInfo
+import chisel3.dontTouch
+import chisel3.util.random.LFSR
 
 case class ICacheParams(
   nSets: Int = 64,
@@ -50,6 +48,7 @@ class ICacheErrors(implicit p: Parameters) extends CoreBundle()(p) with HasL1ICa
     (cacheParams.tagCode.canDetect || cacheParams.dataCode.canDetect).option(Valid(UInt(width = paddrBits)))
   val uncorrectable =
     (cacheParams.itimAddr.nonEmpty && cacheParams.dataCode.canDetect).option(Valid(UInt(width = paddrBits)))
+  val bus = Valid(UInt(width = paddrBits))
 }
 
 class ICache(val icacheParams: ICacheParams, val hartId: Int)(implicit p: Parameters) extends LazyModule {
@@ -241,6 +240,8 @@ class ICacheModule(outer: ICache) extends LazyModuleImp(outer) with HasL1ICacheP
 
     ccover(tl_out.d.bits.corrupt, "D_CORRUPT", "I$ D-channel corrupt")
   }
+  io.errors.bus.valid := tl_out.d.fire() && (tl_out.d.bits.denied || tl_out.d.bits.corrupt)
+  io.errors.bus.bits := (refill_paddr >> blockOffBits) << blockOffBits
 
   val vb_array = Reg(init = Bits(0, nSets * nWays))
   when(refill_one_beat) {

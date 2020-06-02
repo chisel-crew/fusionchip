@@ -2,8 +2,6 @@
 
 package freechips.rocketchip.amba.axi4
 
-import scala.math.{min,max}
-
 import Chisel._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
@@ -38,6 +36,7 @@ class AXI4IdIndexer(idBits: Int)(implicit p: Parameters) extends LazyModule
             maxFlight = old.maxFlight.flatMap { o => m.maxFlight.map { n => o+n } })
         }
       }
+      names.foreach { n => if (n.isEmpty) n += "<unused>" }
       val bits = log2Ceil(mp.endId) - idBits
       val field = if (bits > 0) Seq(AXI4ExtraIdField(bits)) else Nil
       mp.copy(

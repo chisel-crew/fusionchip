@@ -2,9 +2,8 @@
 // See LICENSE.Berkeley for license details.
 
 package freechips.rocketchip.system
-import Chisel._
+
 import freechips.rocketchip.config.Config
-import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.subsystem._
 
 class WithJtagDTMSystem  extends freechips.rocketchip.subsystem.WithJtagDTM

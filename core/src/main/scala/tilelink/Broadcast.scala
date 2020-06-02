@@ -2,14 +2,13 @@
 
 package freechips.rocketchip.tilelink
 
-import scala.math.{ max, min }
-
 import Chisel.{ defaultCompileOptions => _, _ }
-import freechips.rocketchip.amba.AMBAProt
+import freechips.rocketchip.util.CompileOptions.NotStrictInferReset
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.util.CompileOptions.NotStrictInferReset
 import freechips.rocketchip.util._
+import freechips.rocketchip.amba.AMBAProt
+import scala.math.{ max, min }
 
 class TLBroadcast(lineBytes: Int, numTrackers: Int = 4, bufferless: Boolean = false)(implicit p: Parameters)
     extends LazyModule {

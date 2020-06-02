@@ -2,10 +2,9 @@
 
 package freechips.rocketchip.stage.phases
 
-import chisel3.stage.phases.Elaborate
 import firrtl.AnnotationSeq
-import firrtl.options.Viewer.view
 import firrtl.options.{ Dependency, Phase, PreservesAll, StageOptions }
+import firrtl.options.Viewer.view
 import freechips.rocketchip.stage.RocketChipOptions
 import freechips.rocketchip.system.TestGeneration
 import freechips.rocketchip.util.HasRocketChipStageUtils
@@ -13,7 +12,7 @@ import freechips.rocketchip.util.HasRocketChipStageUtils
 /** Generates a make script to run tests in [[RocketTestSuiteAnnotation]]. */
 class GenerateTestSuiteMakefrags extends Phase with PreservesAll[Phase] with HasRocketChipStageUtils {
 
-  override val prerequisites = Seq(Dependency[Checks], Dependency[Elaborate])
+  override val prerequisites = Seq(Dependency[freechips.rocketchip.system.RocketChiselStage])
 
   override def transform(annotations: AnnotationSeq): AnnotationSeq = {
     val targetDir = view[StageOptions](annotations).targetDir

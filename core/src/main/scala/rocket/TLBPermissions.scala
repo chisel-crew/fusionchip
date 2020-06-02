@@ -3,6 +3,7 @@
 package freechips.rocketchip.rocket
 
 import Chisel._
+
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
 

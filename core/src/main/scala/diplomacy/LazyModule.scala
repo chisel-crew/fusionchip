@@ -2,14 +2,13 @@
 
 package freechips.rocketchip.diplomacy
 
+import Chisel.{ defaultCompileOptions => _, _ }
+import freechips.rocketchip.util.CompileOptions.NotStrictInferReset
+import chisel3.{ withClockAndReset, MultiIOModule, RawModule, Reset }
+import chisel3.internal.sourceinfo.{ SourceInfo, UnlocatableSourceInfo }
+import freechips.rocketchip.config.Parameters
 import scala.collection.immutable.{ ListMap, SortedMap }
 import scala.util.matching._
-
-import Chisel.{ defaultCompileOptions => _, _ }
-import chisel3.internal.sourceinfo.{ SourceInfo, SourceLine, UnlocatableSourceInfo }
-import chisel3.{ withClockAndReset, MultiIOModule, RawModule, Reset }
-import freechips.rocketchip.config.Parameters
-import freechips.rocketchip.util.CompileOptions.NotStrictInferReset
 
 abstract class LazyModule()(implicit val p: Parameters) {
   protected[diplomacy] var children         = List[LazyModule]()

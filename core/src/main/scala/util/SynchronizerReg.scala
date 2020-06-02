@@ -30,7 +30,7 @@ import chisel3.util.{RegEnable, Cat}
 object SynchronizerResetType extends Enumeration {
   val NonSync, Inferred, Sync, Async = Value
 }
-import SynchronizerResetType._
+
 
 private class SynchronizerPrimitiveShiftReg(
   sync: Int,

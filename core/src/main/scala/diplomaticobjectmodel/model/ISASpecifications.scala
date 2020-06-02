@@ -1,8 +1,6 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.diplomaticobjectmodel.model
-import freechips.rocketchip.tile.CoreParams
-import freechips.rocketchip.util.BooleanToAugmentedBoolean
 
 sealed trait PrivilegedArchitectureExtension extends OMEnum
 case object MachineLevelISA                  extends PrivilegedArchitectureExtension

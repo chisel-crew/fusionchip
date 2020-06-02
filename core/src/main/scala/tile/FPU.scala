@@ -3,15 +3,15 @@
 
 package freechips.rocketchip.tile
 
-import Chisel.ImplicitConversions._
 import Chisel.{ defaultCompileOptions => _, _ }
-import chisel3.experimental.{ chiselName, NoChiselNamePrefix }
-import chisel3.internal.sourceinfo.SourceInfo
-import chisel3.withClock
-import freechips.rocketchip.config.Parameters
-import freechips.rocketchip.rocket.Instructions._
-import freechips.rocketchip.rocket._
 import freechips.rocketchip.util.CompileOptions.NotStrictInferReset
+import Chisel.ImplicitConversions._
+import chisel3.withClock
+import chisel3.internal.sourceinfo.SourceInfo
+import chisel3.experimental.{ chiselName, NoChiselNamePrefix }
+import freechips.rocketchip.config.Parameters
+import freechips.rocketchip.rocket._
+import freechips.rocketchip.rocket.Instructions._
 import freechips.rocketchip.util._
 import freechips.rocketchip.util.property._
 
@@ -27,7 +27,6 @@ object FPConstants {
   val RM_SZ    = 3
   val FLAGS_SZ = 5
 }
-import FPConstants._
 
 trait HasFPUCtrlSigs {
   val ldst      = Bool()

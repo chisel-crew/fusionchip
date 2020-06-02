@@ -1,9 +1,8 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.linting
+
 import chisel3.experimental.annotate
-import firrtl._
-import firrtl.ir._
 
 /** Chisel users: Use to whitelist files
   * Lint rule writers: update linters list whenever a new lint rule is created

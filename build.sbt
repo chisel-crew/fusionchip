@@ -38,7 +38,7 @@ lazy val macros = (project in file("macros"))
 lazy val core = (project in file("core"))
   .settings(
     name := "core",
-    scalaVersion := "2.12.10",
+    scalaVersion := "2.12.11",
     maxErrors := 3,
     commonSettings,
     commonDeps,

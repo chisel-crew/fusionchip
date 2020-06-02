@@ -3,13 +3,12 @@
 package freechips.rocketchip.subsystem
 
 import Chisel._
-import chisel3.dontTouch
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.devices.debug.TLDebugModule
 import freechips.rocketchip.devices.tilelink.{BasicBusBlocker, BasicBusBlockerParams, CLINT, CLINTConsts, TLPLIC, PLICKey}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.interrupts._
-import freechips.rocketchip.tile.{BaseTile, LookupByHartId, LookupByHartIdImpl, TileParams, HasExternallyDrivenTileConstants}
+import freechips.rocketchip.tile.{BaseTile, TileParams}
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.util._
 

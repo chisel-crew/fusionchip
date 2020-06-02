@@ -2,14 +2,12 @@
 
 package freechips.rocketchip.tilelink
 
-import scala.math.{ max, min }
-
 import Chisel._
-import TLMessages._
-import freechips.rocketchip.amba.AMBAProt
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.util._
+import freechips.rocketchip.amba.AMBAProt
+import TLMessages._
 
 class TLCacheCork(unsafe: Boolean = false, sinkIds: Int = 8)(implicit p: Parameters) extends LazyModule {
   val node = TLAdapterNode(

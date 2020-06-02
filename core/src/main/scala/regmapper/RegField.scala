@@ -2,12 +2,12 @@
 
 package freechips.rocketchip.regmapper
 
-import org.json4s.JsonAST.JValue
-import org.json4s.JsonDSL._
-import org.json4s.jackson.JsonMethods.{ pretty, render }
-
 import Chisel._
 import chisel3.util.{ ReadyValidIO }
+
+import org.json4s.JsonDSL._
+import org.json4s.JsonAST.JValue
+
 import freechips.rocketchip.util.{ SimpleRegIO }
 
 // This information is not used internally by the regmap(...) function.

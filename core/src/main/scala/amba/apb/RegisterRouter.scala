@@ -2,14 +2,11 @@
 
 package freechips.rocketchip.amba.apb
 
-import scala.math.{ max, min }
-
 import Chisel._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.interrupts.{ IntSourceNode, IntSourcePortSimple }
 import freechips.rocketchip.regmapper._
-import freechips.rocketchip.util._
+import freechips.rocketchip.interrupts.{ IntSourceNode, IntSourcePortSimple }
 
 case class APBRegisterNode(
   address: AddressSet,

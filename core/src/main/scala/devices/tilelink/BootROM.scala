@@ -2,15 +2,14 @@
 
 package freechips.rocketchip.devices.tilelink
 
-import java.nio.file.{ Files, Paths }
-import java.nio.{ ByteBuffer, ByteOrder }
-
 import Chisel._
 import freechips.rocketchip.config.{ Field, Parameters }
-import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.subsystem.{ BaseSubsystem, HasResetVectorWire }
+import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
-import freechips.rocketchip.util._
+
+import java.nio.ByteBuffer
+import java.nio.file.{ Files, Paths }
 
 /** Size, location and contents of the boot rom. */
 case class BootROMParams(

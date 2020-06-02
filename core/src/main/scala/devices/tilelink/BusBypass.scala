@@ -2,14 +2,10 @@
 
 package freechips.rocketchip.devices.tilelink
 
-import scala.math.min
-
 import Chisel._
-import chisel3.experimental.withReset
-import freechips.rocketchip.config.{ Field, Parameters }
+import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
-import freechips.rocketchip.util._
 
 abstract class TLBusBypassBase(
   beatBytes: Int,

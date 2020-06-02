@@ -6,22 +6,20 @@ package freechips.rocketchip.devices.debug
 import chisel3._
 import chisel3.experimental.chiselName
 import chisel3.util._
-import freechips.rocketchip.amba.apb.{APBToTL, APBFanout}
 import freechips.rocketchip.config._
-import freechips.rocketchip.devices.debug.systembusaccess._
-import freechips.rocketchip.devices.tilelink.TLBusBypass
-import freechips.rocketchip.devices.tilelink.{DevNullParams, TLError}
 import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.diplomaticobjectmodel.logicaltree.{DebugLogicalTreeNode, LogicalModuleTree}
-import freechips.rocketchip.diplomaticobjectmodel.model._
-import freechips.rocketchip.interrupts._
 import freechips.rocketchip.regmapper._
 import freechips.rocketchip.rocket.Instructions
 import freechips.rocketchip.tile.MaxHartIdBits
 import freechips.rocketchip.tilelink._
-import freechips.rocketchip.util.BooleanToAugmentedBoolean
+import freechips.rocketchip.devices.tilelink.{DevNullParams, TLError}
+import freechips.rocketchip.interrupts._
 import freechips.rocketchip.util._
-import freechips.rocketchip.util.property._
+import freechips.rocketchip.devices.debug.systembusaccess._
+import freechips.rocketchip.devices.tilelink.TLBusBypass
+import freechips.rocketchip.diplomaticobjectmodel.logicaltree.DebugLogicalTreeNode
+import freechips.rocketchip.amba.apb.{APBToTL, APBFanout}
+import freechips.rocketchip.util.BooleanToAugmentedBoolean
 
 object DsbBusConsts {
   def sbAddrWidth = 12
@@ -72,19 +70,16 @@ object DebugModuleAccessType extends scala.Enumeration {
   type DebugModuleAccessType = Value
   val Access8Bit, Access16Bit, Access32Bit, Access64Bit, Access128Bit = Value
 }
-import DebugModuleAccessType._
 
 object DebugAbstractCommandError extends scala.Enumeration {
   type DebugAbstractCommandError = Value
   val Success, ErrBusy, ErrNotSupported, ErrException, ErrHaltResume = Value
 }
-import DebugAbstractCommandError._
 
 object DebugAbstractCommandType extends scala.Enumeration {
   type DebugAbstractCommandType = Value
   val AccessRegister, QuickAccess  = Value
 }
-import DebugAbstractCommandType._
 
 /** Parameters exposed to the top-level design, set based on
   * external requirements, etc.
@@ -738,10 +733,9 @@ class TLDebugModuleInner(device: Device, getNComponents: () => Int, beatBytes: I
     // Import constants for shorter variable names
     //--------------------------------------------------------------
 
-    import DMIConsts._
     import DMI_RegAddrs._
+    import DsbRegAddrs._
     import DsbBusConsts._
-import DsbRegAddrs._
 
     //--------------------------------------------------------------
     // Sanity Check Configuration For this implementation.

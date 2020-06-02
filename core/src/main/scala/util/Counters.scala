@@ -3,8 +3,6 @@
 
 package freechips.rocketchip.util
 
-import scala.math.max
-
 import Chisel._
 
 // Produces 0-width value when counting to 1

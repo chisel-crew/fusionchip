@@ -11,8 +11,8 @@ import freechips.rocketchip.diplomaticobjectmodel.logicaltree.{
   LogicalTreeNode
 }
 import freechips.rocketchip.diplomaticobjectmodel.model.APB
-import freechips.rocketchip.tilelink.LFSRNoiseMaker
 import freechips.rocketchip.util._
+import freechips.rocketchip.tilelink.LFSRNoiseMaker
 
 class APBRAM(
   address: AddressSet,
@@ -46,7 +46,7 @@ class APBRAM(
 
   lazy val module = new LazyModuleImp(this) {
     val (in, _)              = node.in(0)
-    val (mem, omSRAM, omMem) = makeSinglePortedByteWriteSeqMem(size = 1 << mask.filter(b => b).size)
+    val (mem, omSRAM, omMem) = makeSinglePortedByteWriteSeqMem(size = BigInt(1) << mask.filter(b => b).size)
 
     parentLogicalTreeNode.map {
       case parentLTN =>

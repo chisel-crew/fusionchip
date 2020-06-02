@@ -2,14 +2,12 @@
 
 package freechips.rocketchip.diplomacy
 
-import scala.collection.mutable.ListBuffer
-import scala.util.matching._
-
 import Chisel._
 import chisel3.experimental.IO
 import chisel3.internal.sourceinfo.SourceInfo
 import freechips.rocketchip.config.{Parameters,Field}
 import freechips.rocketchip.util.HeterogeneousBag
+import scala.collection.mutable.ListBuffer
 
 case object MonitorsEnabled extends Field[Boolean](true)
 case object RenderFlipped extends Field[Boolean](false)

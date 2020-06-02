@@ -1,7 +1,7 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.amba
-import chisel3._
+
 import freechips.rocketchip.diplomacy._
 
 package object axis {

@@ -3,7 +3,6 @@
 package freechips.rocketchip.amba.axi4
 
 import Chisel._
-import freechips.rocketchip.amba._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.diplomaticobjectmodel.logicaltree.{
@@ -13,6 +12,7 @@ import freechips.rocketchip.diplomaticobjectmodel.logicaltree.{
 }
 import freechips.rocketchip.diplomaticobjectmodel.model.AXI4_Lite
 import freechips.rocketchip.util._
+import freechips.rocketchip.amba._
 
 // Setting wcorrupt=true is not enough to enable the w.user field
 // You must also list AMBACorrupt in your master's requestFields
@@ -50,7 +50,7 @@ class AXI4RAM(
 
   lazy val module = new LazyModuleImp(this) {
     val (in, edgeIn)         = node.in(0)
-    val (mem, omSRAM, omMem) = makeSinglePortedByteWriteSeqMem(size = 1L << mask.filter(b => b).size)
+    val (mem, omSRAM, omMem) = makeSinglePortedByteWriteSeqMem(size = BigInt(1) << mask.filter(b => b).size)
 
     parentLogicalTreeNode.map {
       case parentLTN =>

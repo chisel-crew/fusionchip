@@ -2,11 +2,11 @@
 
 package freechips.rocketchip.subsystem
 
-import freechips.rocketchip.amba.axi4._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.interrupts._
 import freechips.rocketchip.tilelink._
+import freechips.rocketchip.amba.axi4._
+import freechips.rocketchip.interrupts._
 @deprecated(
   "Only use this trait if you are confident you island will only ever be crossed to a single clock",
   "rocket-chip 1.3"

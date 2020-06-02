@@ -3,19 +3,18 @@
 
 package freechips.rocketchip.rocket
 
-import scala.collection.mutable.ListBuffer
-
-import Chisel.ImplicitConversions._
 import Chisel._
-import chisel3.experimental.chiselName
-import chisel3.internal.sourceinfo.SourceInfo
+import Chisel.ImplicitConversions._
 import chisel3.withClock
+import chisel3.internal.sourceinfo.SourceInfo
+import chisel3.experimental.chiselName
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.subsystem.CacheBlockBytes
 import freechips.rocketchip.tile._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.util._
 import freechips.rocketchip.util.property._
+import scala.collection.mutable.ListBuffer
 
 class PTWReq(implicit p: Parameters) extends CoreBundle()(p) {
   val addr = UInt(width = vpnBits)
@@ -178,7 +177,7 @@ class PTW(n: Int)(implicit edge: TLEdgeOut, p: Parameters) extends CoreModule()(
       val hits = tags.map(_ === pte_addr).asUInt & valid
       val hit  = hits.orR
       when(mem_resp_valid && traverse && !hit && !invalidated) {
-        val r = Mux(valid.andR, plru.replace, PriorityEncoder(~valid))
+        val r = Mux(valid.andR, plru.way, PriorityEncoder(~valid))
         valid := valid | UIntToOH(r)
         tags(r) := pte_addr
         data(r) := pte.ppn

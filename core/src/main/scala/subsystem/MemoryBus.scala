@@ -1,11 +1,10 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.subsystem
-import Chisel._
+
 import freechips.rocketchip.config._
 import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.interrupts._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.util._
 

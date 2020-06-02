@@ -14,9 +14,9 @@ import freechips.rocketchip.diplomaticobjectmodel.logicaltree.{
   RocketLogicalTreeNode
 }
 import freechips.rocketchip.interrupts._
+import freechips.rocketchip.tilelink._
 import freechips.rocketchip.rocket._
 import freechips.rocketchip.subsystem.{ HartPrefixKey, ResetSynchronous, RocketCrossingParams, SubsystemResetSchemeKey }
-import freechips.rocketchip.tilelink._
 import freechips.rocketchip.util._
 
 case class RocketTileParams(

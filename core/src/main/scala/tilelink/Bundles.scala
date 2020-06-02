@@ -2,12 +2,9 @@
 
 package freechips.rocketchip.tilelink
 
-import scala.collection.immutable.ListMap
-
 import Chisel._
-import chisel3.util.{ReadyValidIO}
-import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.util._
+import scala.collection.immutable.ListMap
 
 abstract class TLBundleBase(params: TLBundleParameters) extends GenericParameterizedBundle(params)
 
@@ -15,7 +12,7 @@ abstract class TLBundleBase(params: TLBundleParameters) extends GenericParameter
 //   Put + Acquire
 //   Release + AccessAck
 
-object TLMessages 
+object TLMessages
 {
   //                                  A    B    C    D    E
   def PutFullData    = UInt(0) //     .    .                   => AccessAck
@@ -38,7 +35,7 @@ object TLMessages
   def GrantData      = UInt(5) //                    .         => GrantAck
   def ReleaseAck     = UInt(6) //                    .
   def GrantAck       = UInt(0) //                         .
- 
+
   def isA(x: UInt) = x <= AcquirePerm
   def isB(x: UInt) = x <= Probe
   def isC(x: UInt) = x <= ReleaseData
@@ -46,7 +43,7 @@ object TLMessages
 
   def adResponse = Vec(AccessAck, AccessAck, AccessAckData, AccessAckData, AccessAckData, HintAck, Grant, Grant)
   def bcResponse = Vec(AccessAck, AccessAck, AccessAckData, AccessAckData, AccessAckData, HintAck, ProbeAck, ProbeAck)
-  
+
   def a = Seq( ("PutFullData",TLPermissions.PermMsgReserved),
                ("PutPartialData",TLPermissions.PermMsgReserved),
                ("ArithmeticData",TLAtomics.ArithMsg),
@@ -87,7 +84,7 @@ object TLMessages
   * The three primary TileLink permissions are:
   *   (T)runk: the agent is (or is on inwards path to) the global point of serialization.
   *   (B)ranch: the agent is on an outwards path to
-  *   (N)one: 
+  *   (N)one:
   * These permissions are permuted by transfer operations in various ways.
   * Operations can cap permissions, request for them to be grown or shrunk,
   * or for a report on their current status.
@@ -125,12 +122,12 @@ object TLPermissions
   def PermMsgGrow:Seq[String] = Seq("Grow NtoB", "Grow NtoT", "Grow BtoT")
   def PermMsgCap:Seq[String] = Seq("Cap toT", "Cap toB", "Cap toN")
   def PermMsgReport:Seq[String] = Seq("Shrink TtoB", "Shrink TtoN", "Shrink BtoN", "Report TotT", "Report BtoB", "Report NtoN")
-  def PermMsgReserved:Seq[String] = Seq("Reserved") 
+  def PermMsgReserved:Seq[String] = Seq("Reserved")
 }
 
 object TLAtomics
 {
-  val width = 3 
+  val width = 3
 
   // Arithmetic types
   def MIN  = UInt(0, width)
@@ -150,7 +147,7 @@ object TLAtomics
   def ArithMsg:Seq[String] = Seq("MIN", "MAX", "MINU", "MAXU", "ADD")
   def LogicMsg:Seq[String] = Seq("XOR", "OR", "AND", "SWAP")
 }
- 
+
 
 object TLHints
 {
@@ -240,7 +237,7 @@ final class TLBundleE(params: TLBundleParameters)
   extends TLBundleBase(params) with TLChannel
 {
   val channelName = "'E' channel"
-  val sink = UInt(width = params.sinkBits) // to  
+  val sink = UInt(width = params.sinkBits) // to
 }
 
 class TLBundle(val params: TLBundleParameters) extends Record

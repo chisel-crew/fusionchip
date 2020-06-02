@@ -3,8 +3,8 @@
 package freechips.rocketchip.subsystem
 
 import Chisel._
-import freechips.rocketchip.devices.tilelink.CanHavePeripheryCLINT
 import freechips.rocketchip.diplomacy.{ DTSTimebase, LazyModuleImp }
+import freechips.rocketchip.devices.tilelink.CanHavePeripheryCLINT
 
 trait HasRTCModuleImp extends LazyModuleImp {
   val outer: BaseSubsystem with CanHavePeripheryCLINT

@@ -2,17 +2,18 @@
 
 package freechips.rocketchip.util
 
-import org.json4s.JsonDSL._
-import org.json4s.jackson.JsonMethods.{pretty, render}
-
 import Chisel._
-import chisel3.RawModule
-import chisel3.experimental.{annotate, ChiselAnnotation}
 import chisel3.internal.InstanceId
+import chisel3.experimental.{annotate, ChiselAnnotation}
+import chisel3.RawModule
 import firrtl.annotations._
+
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.regmapper._
 import freechips.rocketchip.tilelink.TLToAXI4IdMapEntry
+
+import org.json4s.JsonDSL._
+import org.json4s.jackson.JsonMethods.{pretty, render}
 
 /** Record a sram. */
 case class SRAMAnnotation(target: Named,

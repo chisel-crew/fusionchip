@@ -548,8 +548,8 @@ case class OnePortLanePositionedQueue(ecc: Code) extends LanePositionedQueue {
 
 /////////////////////////////// Black Box Unit Testing /////////////////////////////
 
-import freechips.rocketchip.tilelink.LFSR64
 import freechips.rocketchip.unittest._
+import freechips.rocketchip.tilelink.LFSR64
 
 class PositionedQueueTest(
   queueFactory: LanePositionedQueue,

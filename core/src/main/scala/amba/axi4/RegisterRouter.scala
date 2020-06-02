@@ -2,13 +2,11 @@
 
 package freechips.rocketchip.amba.axi4
 
-import scala.math.{min,max}
-
 import Chisel._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.interrupts.{IntSourceNode, IntSourcePortSimple}
 import freechips.rocketchip.regmapper._
+import freechips.rocketchip.interrupts.{IntSourceNode, IntSourcePortSimple}
 import freechips.rocketchip.util._
 
 case object AXI4RRId extends ControlKey[UInt]("extra_id")

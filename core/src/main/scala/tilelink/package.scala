@@ -1,7 +1,7 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip
-import Chisel._
+
 import freechips.rocketchip.diplomacy._
 
 package object tilelink {
@@ -16,6 +16,26 @@ package object tilelink {
     TLSlavePortParameters,
     TLEdgeOut,
     TLBundle
+  ]
+  type TLMixedNodeCancel = NodeHandle[
+    TLMasterPortParameters,
+    TLSlavePortParameters,
+    TLEdgeIn,
+    TLBundle_ACancel,
+    TLMasterPortParameters,
+    TLSlavePortParameters,
+    TLEdgeOut,
+    TLBundle
+  ]
+  type TLNode_ACancel = NodeHandle[
+    TLMasterPortParameters,
+    TLSlavePortParameters,
+    TLEdgeIn,
+    TLBundle_ACancel,
+    TLMasterPortParameters,
+    TLSlavePortParameters,
+    TLEdgeOut,
+    TLBundle_ACancel
   ]
   type TLManagerParameters     = TLSlaveParameters
   type TLManagerPortParameters = TLSlavePortParameters

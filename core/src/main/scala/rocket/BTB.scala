@@ -3,8 +3,8 @@
 
 package freechips.rocketchip.rocket
 
-import Chisel.ImplicitConversions._
 import Chisel._
+import Chisel.ImplicitConversions._
 import chisel3.internal.InstanceId
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.subsystem.CacheBlockBytes
@@ -241,7 +241,7 @@ class BTB(implicit p: Parameters) extends BtbModule {
   }
 
   val repl = new PseudoLRU(entries)
-  val waddr = Mux(updateHit, updateHitAddr, repl.replace)
+  val waddr = Mux(updateHit, updateHitAddr, repl.way)
   val r_resp = Pipe(io.resp)
   when (r_resp.valid && r_resp.bits.taken || r_btb_update.valid) {
     repl.access(Mux(r_btb_update.valid, waddr, r_resp.bits.entry))

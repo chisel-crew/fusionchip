@@ -2,12 +2,9 @@
 
 package freechips.rocketchip.amba.apb
 
-import scala.math.{ max, min }
-
 import Chisel._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.regmapper._
 import freechips.rocketchip.util._
 
 class APBFanout()(implicit p: Parameters) extends LazyModule {

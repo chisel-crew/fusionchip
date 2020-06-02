@@ -1,11 +1,11 @@
 // See LICENSE.SiFive for license details.
 package freechips.rocketchip.amba.axis
-import chisel3._
-import chisel3.internal.sourceinfo.SourceInfo
+
 import chisel3.util._
+import chisel3.internal.sourceinfo.SourceInfo
 import freechips.rocketchip.config.Parameters
-import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.util._
+import freechips.rocketchip.diplomacy._
 
 class AXISSlaveParameters private (
   val name: String,

@@ -3,13 +3,11 @@
 package freechips.rocketchip.subsystem
 
 import Chisel._
-import chisel3.internal.sourceinfo.SourceInfo
 import freechips.rocketchip.config.{ Field, Parameters }
-import freechips.rocketchip.devices.debug.{ HasPeripheryDebug, HasPeripheryDebugModuleImp }
 import freechips.rocketchip.devices.tilelink._
+import freechips.rocketchip.devices.debug.{ HasPeripheryDebug, HasPeripheryDebugModuleImp }
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.diplomaticobjectmodel.logicaltree._
-import freechips.rocketchip.diplomaticobjectmodel.model._
 import freechips.rocketchip.tile._
 
 case object HartPrefixKey extends Field[Boolean](false)

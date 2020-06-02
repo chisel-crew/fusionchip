@@ -3,9 +3,9 @@
 package freechips.rocketchip.diplomacy
 
 import chisel3._
-import chisel3.experimental.{ DataMirror, IO }
 import chisel3.internal.sourceinfo.SourceInfo
-import freechips.rocketchip.config.{ Field, Parameters }
+import chisel3.experimental.DataMirror
+import freechips.rocketchip.config.Parameters
 
 case class BundleBridgeParams[T <: Data](gen: () => T)
 case class BundleBridgeNull()

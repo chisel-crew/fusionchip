@@ -2,8 +2,6 @@
 
 package freechips.rocketchip.amba.axi4
 
-import scala.math.{min,max}
-
 import Chisel._
 import chisel3.util.IrrevocableIO
 import freechips.rocketchip.config.Parameters

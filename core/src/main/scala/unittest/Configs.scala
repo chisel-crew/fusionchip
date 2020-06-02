@@ -7,8 +7,8 @@ import freechips.rocketchip.amba.ahb._
 import freechips.rocketchip.amba.apb._
 import freechips.rocketchip.amba.axi4._
 import freechips.rocketchip.config._
-import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.subsystem.{BaseSubsystemConfig}
+import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.util._
 
@@ -121,6 +121,14 @@ class WithScatterGatherTests extends Config((site, here, up) => {
       Module(new ScatterTest(8)),
       Module(new ScatterTest(9)))}})
 
+class WithPLRUTests extends Config((site, here, up) => {
+  case UnitTests => (q: Parameters) => {
+    Seq(
+      Module(new PLRUTest(2)),
+      Module(new PLRUTest(3)),
+      Module(new PLRUTest(4)),
+      Module(new PLRUTest(6)))}})
+
 class WithPowerQueueTests extends Config((site, here, up) => {
   case UnitTests => (q: Parameters) => {
     Seq(
@@ -158,4 +166,5 @@ class TLWidthUnitTestConfig extends Config(new WithTLWidthUnitTests ++ new WithT
 class TLXbarUnitTestConfig extends Config(new WithTLXbarUnitTests ++ new WithTestDuration(10) ++ new BaseSubsystemConfig)
 class ECCUnitTestConfig extends Config(new WithECCTests)
 class ScatterGatherTestConfig extends Config(new WithScatterGatherTests)
+class PLRUUnitTestConfig extends Config(new WithPLRUTests)
 class PowerQueueTestConfig extends Config(new WithPowerQueueTests)

@@ -2,7 +2,6 @@
 
 package freechips.rocketchip.stage.phases
 
-import chisel3.stage.phases.{ Convert, Elaborate, MaybeAspectPhase }
 import firrtl.AnnotationSeq
 import firrtl.annotations.{ Annotation, DeletedAnnotation, JsonProtocol }
 import firrtl.options.Viewer.view
@@ -13,12 +12,7 @@ import freechips.rocketchip.util.HasRocketChipStageUtils
 /** Writes FIRRTL annotations into a file */
 class GenerateFirrtlAnnos extends Phase with PreservesAll[Phase] with HasRocketChipStageUtils {
 
-  override val prerequisites = Seq(
-    Dependency[Checks],
-    Dependency[Elaborate],
-    Dependency[Convert],
-    Dependency[MaybeAspectPhase]
-  )
+  override val prerequisites = Seq(Dependency[freechips.rocketchip.system.RocketChiselStage])
 
   override def transform(annotations: AnnotationSeq): AnnotationSeq = {
     val targetDir = view[StageOptions](annotations).targetDir

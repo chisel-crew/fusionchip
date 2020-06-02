@@ -1,9 +1,8 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.amba.axis
-import chisel3._
+
 import chisel3.internal.sourceinfo.SourceInfo
-import chisel3.util._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
 

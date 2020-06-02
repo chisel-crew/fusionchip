@@ -2,8 +2,6 @@
 
 package freechips.rocketchip.tilelink
 
-import scala.math.{ max, min }
-
 import Chisel._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._

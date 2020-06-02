@@ -3,8 +3,8 @@
 
 package freechips.rocketchip.rocket
 
-import Chisel.ImplicitConversions._
 import Chisel._
+
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.util._
 

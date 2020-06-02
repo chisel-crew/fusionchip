@@ -44,7 +44,6 @@ object ALU {
 }
 
 import ALU._
-import Instructions._
 
 class ALU(implicit p: Parameters) extends CoreModule()(p) {
   val io = new Bundle {

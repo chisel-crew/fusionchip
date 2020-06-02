@@ -5,9 +5,9 @@ package rule
 
 import firrtl._
 import firrtl.ir._
+import firrtl.traversals.Foreachers._
 import firrtl.options.{ Dependency, PreservesAll, RegisteredLibrary, ShellOption }
 import firrtl.stage.RunFirrtlTransformAnnotation
-import firrtl.traversals.Foreachers._
 
 /** Template class for lint rules
  * @note After extending this class, be sure to update the linter list in [[Linter]]

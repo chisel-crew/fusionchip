@@ -3,17 +3,18 @@
 
 package freechips.rocketchip.rocket
 
-import Chisel.ImplicitConversions._
 import Chisel._
-import chisel3.internal.sourceinfo.SourceInfo
+import Chisel.ImplicitConversions._
+
 import freechips.rocketchip.config.{ Field, Parameters }
-import freechips.rocketchip.devices.debug.DebugModuleKey
-import freechips.rocketchip.diplomacy.RegionType
 import freechips.rocketchip.subsystem.CacheBlockBytes
-import freechips.rocketchip.tile.{ CoreBundle, CoreModule, XLen }
+import freechips.rocketchip.diplomacy.RegionType
+import freechips.rocketchip.tile.{ CoreBundle, CoreModule }
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.util._
 import freechips.rocketchip.util.property._
+import freechips.rocketchip.devices.debug.DebugModuleKey
+import chisel3.internal.sourceinfo.SourceInfo
 
 case object PgLevels extends Field[Int](2)
 case object ASIdBits extends Field[Int](0)
@@ -362,8 +363,8 @@ class TLB(instruction: Boolean, lgMaxSize: Int, cfg: TLBConfig)(implicit edge: T
       state := s_request
       r_refill_tag := vpn
 
-      r_superpage_repl_addr := replacementEntry(superpage_entries, superpage_plru.replace)
-      r_sectored_repl_addr := replacementEntry(sectored_entries, sectored_plru.replace)
+      r_superpage_repl_addr := replacementEntry(superpage_entries, superpage_plru.way)
+      r_sectored_repl_addr := replacementEntry(sectored_entries, sectored_plru.way)
       r_sectored_hit_addr := OHToUInt(sector_hits)
       r_sectored_hit := sector_hits.orR
     }

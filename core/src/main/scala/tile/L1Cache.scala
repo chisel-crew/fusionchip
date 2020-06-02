@@ -3,9 +3,8 @@
 package freechips.rocketchip.tile
 
 import Chisel._
-import freechips.rocketchip.config.{ Field, Parameters }
-import freechips.rocketchip.tilelink.ClientMetadata
-import freechips.rocketchip.util._
+
+import freechips.rocketchip.config.Parameters
 
 trait L1CacheParams {
   def nSets: Int

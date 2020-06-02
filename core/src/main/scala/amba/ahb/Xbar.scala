@@ -2,12 +2,9 @@
 
 package freechips.rocketchip.amba.ahb
 
-import scala.math.{min,max}
-
 import Chisel._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.regmapper._
 import freechips.rocketchip.util._
 
 class AHBFanout()(implicit p: Parameters) extends LazyModule {

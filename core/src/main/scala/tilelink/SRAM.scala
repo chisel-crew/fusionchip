@@ -69,10 +69,11 @@ class TLRAM(
   lazy val module = new LazyModuleImp(this) {
     val (in, edge) = node.in(0)
 
-    val width                = code.width(eccBytes * 8)
-    val lanes                = beatBytes / eccBytes
-    val addrBits             = (mask zip edge.addr_hi(in.a.bits).asBools).filter(_._1).map(_._2)
-    val (mem, omSRAM, omMem) = makeSinglePortedByteWriteSeqMem(size = 1 << addrBits.size, lanes = lanes, bits = width)
+    val width    = code.width(eccBytes * 8)
+    val lanes    = beatBytes / eccBytes
+    val addrBits = (mask zip edge.addr_hi(in.a.bits).asBools).filter(_._1).map(_._2)
+    val (mem, omSRAM, omMem) =
+      makeSinglePortedByteWriteSeqMem(size = BigInt(1) << addrBits.size, lanes = lanes, bits = width)
 
     parentLogicalTreeNode.map {
       case parentLTN =>

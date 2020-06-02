@@ -2,22 +2,21 @@
 
 package freechips.rocketchip.tile
 
-import Chisel.ImplicitConversions._
 import Chisel._
-import chisel3.DontCare
+import Chisel.ImplicitConversions._
 import chisel3.util.Valid
+import chisel3.DontCare
 import freechips.rocketchip.config.Parameters
+import freechips.rocketchip.rocket._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.diplomaticobjectmodel.logicaltree.{
   BusErrorLogicalTreeNode,
   LogicalModuleTree,
   LogicalTreeNode
 }
-import freechips.rocketchip.interrupts._
 import freechips.rocketchip.regmapper._
-import freechips.rocketchip.rocket._
 import freechips.rocketchip.tilelink._
-import freechips.rocketchip.util._
+import freechips.rocketchip.interrupts._
 import freechips.rocketchip.util.property._
 
 trait BusErrors extends Bundle {
@@ -31,11 +30,11 @@ class L1BusErrors(implicit p: Parameters) extends CoreBundle()(p) with BusErrors
   def toErrorList =
     List(
       None,
-      None,
-      icache.correctable.map((_, "I_CORRECTABLE", "Instruction cache or ITIM correctable ECC error ")),
+      Some((icache.bus, "IBUS", "Instruction cache TileLink bus error")),
+      icache.correctable.map((_, "I_CORRECTABLE", "Instruction cache or ITIM correctable ECC error")),
       icache.uncorrectable.map((_, "I_UNCORRECTABLE", "ITIM uncorrectable ECC error")),
       None,
-      Some((dcache.bus, "DBUS", "Load or store TileLink bus error")),
+      Some((dcache.bus, "DBUS", "Load/Store/PTW TileLink bus error")),
       dcache.correctable.map((_, "D_CORRECTABLE", "Data cache correctable ECC error")),
       dcache.uncorrectable.map((_, "D_UNCORRECTABLE", "Data cache uncorrectable ECC error"))
     )

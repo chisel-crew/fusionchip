@@ -34,19 +34,19 @@ object Emit extends App {
 
     case "vlog" =>
       println("Running vlog")
-      val stage     = new RocketChipStage()
+      new RocketChipStage()
       val cfg       = new FusionConfig()
       lazy val ldut = LazyModule(new FusionSystem()(cfg))
-      lazy val dut  = Module(ldut.module)
+      Module(ldut.module)
 
       println(">>>>>>>>>>")
-      stage.emitVerilog(
-        dut,
-        Array.empty[String],
-        // Seq.empty[AnnotationSeq],
-        stage.run(runAnnotations("fusion.FusionConfig", "fusion.FusionSystem"))
-        // EEE.emit("/testbuild", Seq(chisel3.stage.ChiselGeneratorAnnotation(() => dut)))
-      )
+      //stage.emitVerilog(
+      //  dut,
+      //  Array.empty[String],
+      //  // Seq.empty[AnnotationSeq],
+      //  stage.run(runAnnotations("fusion.FusionConfig", "fusion.FusionSystem"))
+      //  // EEE.emit("/testbuild", Seq(chisel3.stage.ChiselGeneratorAnnotation(() => dut)))
+      //)
 
     case _ => new RuntimeException("Invalid entity provided")
   }

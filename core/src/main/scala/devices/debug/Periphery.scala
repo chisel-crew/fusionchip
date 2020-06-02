@@ -4,18 +4,16 @@ package freechips.rocketchip.devices.debug
 
 import chisel3._
 import chisel3.experimental.IntParam
-import chisel3.util.HasBlackBoxResource
 import chisel3.util._
-import freechips.rocketchip.amba.apb._
+import chisel3.util.HasBlackBoxResource
 import freechips.rocketchip.config.{Field, Parameters}
-import freechips.rocketchip.devices.tilelink._
+import freechips.rocketchip.subsystem._
+import freechips.rocketchip.amba.apb._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.diplomaticobjectmodel.logicaltree.LogicalModuleTree
-import freechips.rocketchip.diplomaticobjectmodel.model.OMComponent
 import freechips.rocketchip.jtag._
-import freechips.rocketchip.subsystem._
-import freechips.rocketchip.tilelink._
 import freechips.rocketchip.util._
+import freechips.rocketchip.tilelink._
 
 /** Protocols used for communicating with external debugging tools */
 sealed trait DebugExportProtocol

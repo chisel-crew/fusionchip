@@ -1,8 +1,6 @@
 // See LICENSE.SiFive for license details.
 package freechips.rocketchip.prci
-import scala.math.max
 
-import chisel3._
 import chisel3.internal.sourceinfo.SourceInfo
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy.{ InModuleBody, ModuleValue, ValName }

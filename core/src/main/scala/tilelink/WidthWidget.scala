@@ -2,8 +2,6 @@
 
 package freechips.rocketchip.tilelink
 
-import scala.math.{min,max}
-
 import chisel3._
 import chisel3.util.{DecoupledIO, log2Ceil, Cat, RegEnable}
 import freechips.rocketchip.config.Parameters

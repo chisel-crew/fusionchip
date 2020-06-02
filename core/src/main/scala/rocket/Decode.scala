@@ -2,9 +2,8 @@
 
 package freechips.rocketchip.rocket
 
-import scala.collection.mutable.{ArrayBuffer, Map}
-
 import Chisel._
+import scala.collection.mutable.{ArrayBuffer, Map}
 
 object DecodeLogic
 {

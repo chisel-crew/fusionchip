@@ -2,9 +2,9 @@
 
 package freechips.rocketchip.linting
 
-import chisel3.experimental.ChiselAnnotation
-import firrtl.annotations.NoTargetAnnotation
 import firrtl.ir.{Info, FileInfo}
+import firrtl.annotations.NoTargetAnnotation
+import chisel3.experimental.ChiselAnnotation
 
 /** Parent trait for all linting annotations */
 trait LintAnnotation extends NoTargetAnnotation with ChiselAnnotation {

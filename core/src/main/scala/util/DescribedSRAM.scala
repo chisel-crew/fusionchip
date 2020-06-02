@@ -2,13 +2,9 @@
 // See LICENSE.SiFive for license details.
 
 package freechips.rocketchip.util
-import scala.math.log10
 
-import chisel3.internal.InstanceId
-import chisel3.util.log2Ceil
 import chisel3.{ Data, SyncReadMem, Vec }
-import freechips.rocketchip.amba.axi4.AXI4RAM
-import freechips.rocketchip.diplomacy.DiplomaticSRAM
+import chisel3.util.log2Ceil
 import freechips.rocketchip.diplomaticobjectmodel.DiplomaticObjectModelAddressing
 import freechips.rocketchip.diplomaticobjectmodel.model.{ OMRTLModule, OMSRAM }
 
