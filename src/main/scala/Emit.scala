@@ -5,7 +5,7 @@ import java.nio.file.{ Files, Paths }
 import firrtl.AnnotationSeq
 import firrtl.options.TargetDirAnnotation
 import freechips.rocketchip.stage.{ ConfigsAnnotation, TopModuleAnnotation }
-import freechips.rocketchip.system.{ RocketChipStage, TestHarness, TinyConfig }
+import freechips.rocketchip.system.RocketChipStage
 
 object Emit extends App {
 
@@ -14,7 +14,7 @@ object Emit extends App {
   if (!Files.exists(path))
     Files.createDirectory(path)
 
-  val entity = "core" // {"soc", "core", "vlog"}
+  val entity = "vlog" // {"soc", "core", "vlog"}
 
   private def runAnnotations(cfg: String, top: String) = Seq(
     new TargetDirAnnotation(dest),
@@ -23,26 +23,23 @@ object Emit extends App {
   )
 
   def emitEntity(item: String) = item match {
+
     case "soc" =>
+      println(">>>> Emiting soc")
       new RocketChipStage().run(runAnnotations("fusion.FusionConfig", "fusion.FusionSystem"))
 
     case "core" =>
+      println(">>>> Emiting core")
       new RocketChipStage()
         .run(runAnnotations("freechips.rocketchip.system.TinyConfig", "freechips.rocketchip.system.TestHarness"))
 
     case "vlog" =>
-      println("Running vlog")
+      println(">>>> Emiting vlog")
 
-      // val cfg  = new TinyConfig()
-      // val ldut = LazyModule(new FusionSystem()(cfg))
-      // val dut  = Module(ldut)
-
-      val cfg = new TinyConfig()
-      val circuit = Seq(
-        chisel3.stage.ChiselGeneratorAnnotation(() => new TestHarness()(cfg))
+      VlogEmiter.emit(
+        s"$dest/freechips.rocketchip.system.TinyConfig.fir",
+        runAnnotations("freechips.rocketchip.system.TinyConfig", "freechips.rocketchip.system.TestHarness")
       )
-
-      ChiselEmiter.emit("testbuild", circuit)
 
     case _ => new RuntimeException("Invalid entity provided")
   }
@@ -50,8 +47,9 @@ object Emit extends App {
   emitEntity(entity)
 }
 
-object ChiselEmiter {
-  private lazy val stage = new chisel3.stage.ChiselStage
+object VlogEmiter {
+  private val stage = new chisel3.stage.ChiselStage
 
-  def emit(path: String, ann: AnnotationSeq) = stage.execute((Array("-td", path, "-X", "verilog")), ann)
+  def emit(path: String, ann: AnnotationSeq) =
+    stage.execute((Array("-X", "verilog", "-i", path)), ann)
 }
