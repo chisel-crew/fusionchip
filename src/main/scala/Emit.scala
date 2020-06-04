@@ -2,10 +2,8 @@ package fusion
 
 import java.nio.file.{ Files, Paths }
 
-import Chisel.Module
 import firrtl.AnnotationSeq
 import firrtl.options.TargetDirAnnotation
-import freechips.rocketchip.diplomacy.LazyModule
 import freechips.rocketchip.stage.{ ConfigsAnnotation, TopModuleAnnotation }
 import freechips.rocketchip.system.{ RocketChipStage }
 
@@ -16,7 +14,7 @@ object Emit extends App {
   if (!Files.exists(path))
     Files.createDirectory(path)
 
-  val entity = "soc" // {"soc", "core", "vlog"}
+  val entity = "vlog" // {"soc", "core", "vlog"}
 
   private def runAnnotations(cfg: String, top: String) = Seq(
     new TargetDirAnnotation(dest),
@@ -34,19 +32,13 @@ object Emit extends App {
 
     case "vlog" =>
       println("Running vlog")
-      new RocketChipStage()
-      val cfg       = new FusionConfig()
-      lazy val ldut = LazyModule(new FusionSystem()(cfg))
-      Module(ldut.module)
+      val stage = new RocketChipStage()
 
-      println(">>>>>>>>>>")
-      //stage.emitVerilog(
-      //  dut,
-      //  Array.empty[String],
-      //  // Seq.empty[AnnotationSeq],
-      //  stage.run(runAnnotations("fusion.FusionConfig", "fusion.FusionSystem"))
-      //  // EEE.emit("/testbuild", Seq(chisel3.stage.ChiselGeneratorAnnotation(() => dut)))
-      //)
+      stage.execute(
+        Array("-X", "verilog"),
+        runAnnotations("freechips.rocketchip.system.DefaultConfig", "freechips.rocketchip.system.TestHarness")
+      )
+      println(">>>> Done")
 
     case _ => new RuntimeException("Invalid entity provided")
   }
